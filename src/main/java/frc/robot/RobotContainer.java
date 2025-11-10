@@ -10,7 +10,7 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.DriveWithJoystick;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
-import frc.robot.subsystems.SwerveDriveSubsystem;
+import frc.robot.subsystems.CIMSwerveDriveSubsystem;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   private final XboxController m_driverController = new XboxController(OIConstants.DRIVER_CONTROLLER_PORT);
 
-  private final SwerveDriveSubsystem m_swerveDriveSubsystem = new SwerveDriveSubsystem();
+  private final CIMSwerveDriveSubsystem m_swerveDriveSubsystem = new CIMSwerveDriveSubsystem();
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

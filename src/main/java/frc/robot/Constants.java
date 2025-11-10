@@ -22,7 +22,16 @@ public final class Constants {
     public static final double kMaxSpeedMetersPerSecond = 3.0; // Maximum speed of the robot
     public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI; // Maximum angular speed
 
-    public static final int FRONT_LEFT_ANGLE_MOTOR_ID = 0;
+    //Edit this with pheonix turner IDs
+    public static final int FRONT_LEFT_ANGLE_MOTOR_ID = 0; //correct
+    public static final int FRONT_RIGHT_ANGLE_MOTOR_ID = 15; //correct
+    public static final int BACK_LEFT_ANGLE_MOTOR_ID = 1; //correct
+    public static final int BACK_RIGHT_ANGLE_MOTOR_ID = 3;
+
+    public static final int FRONT_LEFT_DRIVE_MOTOR_ID = 2; //correct
+    public static final int FRONT_RIGHT_DRIVE_MOTOR_ID = 14; //correct
+    public static final int BACK_LEFT_DRIVE_MOTOR_ID = 3; //correct 
+    public static final int BACK_RIGHT_DRIVE_MOTOR_ID = 7;
 
     public static final Translation2d FRONT_LEFT_LOCATION = new Translation2d(robotWidth / 2, robotLength / 2);
     public static final Translation2d FRONT_RIGHT_LOCATION = new Translation2d(robotWidth / 2, -robotLength / 2);
@@ -37,6 +46,8 @@ public final class Constants {
     public static final double kD = 0.01;
 
     public static final int TICKS_PER_REVOLUTION = 4096;
+
+    public static final double MAXPERCENTOUTPUT = 0.4; 
   }
 
   public static final class OIConstants {

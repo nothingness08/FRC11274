@@ -8,14 +8,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.OIConstants;
-import frc.robot.subsystems.SwerveDriveSubsystem;
+import frc.robot.subsystems.CIMSwerveDriveSubsystem;
 
 /** An example command that uses an example subsystem. */
 public class DriveWithJoystick extends Command {
-  private final SwerveDriveSubsystem m_swerveDrive;
+  private final CIMSwerveDriveSubsystem m_swerveDrive;
   private final XboxController m_controller;
 
-  public DriveWithJoystick(SwerveDriveSubsystem swerveDrive, XboxController controller) {
+  public DriveWithJoystick(CIMSwerveDriveSubsystem swerveDrive, XboxController controller) {
     m_swerveDrive = swerveDrive;
     m_controller = controller;
     // Use addRequirements() to tell the scheduler that this command requires the subsystem.
