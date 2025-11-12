@@ -42,9 +42,8 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
     m_backRightDriveMotor
   };
 
-  private double lastAngle = 0;
-  private double offset = 0;
-  private double currentTick = 0;
+  private double[] lastAngle = {0, 0, 0, 0};
+  private double[] offset = {0, 0, 0, 0};
   
   public CIMSwerveDriveSubsystem() {
     //make this for loop to initialize all 4 modules
@@ -73,10 +72,10 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
 
   
   public double thetaToTick(double theta) {
-    return ((theta) / 360.0) * SwerveDriveConstants.TICKS_PER_REVOLUTION;
+    return ((theta - 90) / 360.0) * SwerveDriveConstants.TICKS_PER_REVOLUTION;
   }
 
-  public double getCurrentTick(double currentAngle) {
+  public double getCurrentTick(double currentAngle, double lastAngle, double offset) {
     double delta = currentAngle - lastAngle;
     
     if (delta > 180) {
@@ -97,8 +96,8 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
     for(int i = 0; i < moduleStates.length; i++) {
       SwerveModuleState state = moduleStates[i];
       double currentAngle = state.angle.getDegrees();
-      currentTick = getCurrentTick(currentAngle);
-      lastAngle = currentAngle;
+      double currentTick = getCurrentTick(currentAngle, lastAngle[i], offset[i]);
+      lastAngle[i] = currentAngle;
       m_AngleMotor[i].set(TalonSRXControlMode.Position, currentTick);
       m_DriveMotor[i].set(TalonSRXControlMode.PercentOutput, state.speedMetersPerSecond * SwerveDriveConstants.MAXPERCENTOUTPUT);
     }
@@ -115,6 +114,6 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Current Tick: ", currentTick);
+    //SmartDashboard.putNumber("Current Tick: ", currentTick);
   }
 }

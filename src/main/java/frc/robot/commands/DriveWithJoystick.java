@@ -31,8 +31,8 @@ public class DriveWithJoystick extends Command {
   public void execute() {
     // Get driver inputs from the sticks
     // Invert Y axis because WPILib treats positive Y as down by default
-    double xSpeed = -m_controller.getLeftY(); 
-    double ySpeed = m_controller.getLeftX();
+    double xSpeed = m_controller.getLeftX(); 
+    double ySpeed = -m_controller.getLeftY();
     double rot = m_controller.getRightX();
 
     // Apply a deadband
