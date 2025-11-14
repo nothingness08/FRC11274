@@ -117,9 +117,14 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
     
     for(int i = 0; i < moduleStates.length; i++) {
       SwerveModuleState state = moduleStates[i];
-      double currentAngle = state.angle.getDegrees();
+      double currentAngle;
       if(speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond != 0){
         currentAngle = rotAngles[i];
+      } else if(speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond == 0){
+        currentAngle = lastAngle[i];
+      } 
+      else{
+        currentAngle = state.angle.getDegrees();
       } //check if spin correctly clockw and cclockw with joystick movement, wheels don't move
       double currentTick = getCurrentTick(currentAngle, i);
       lastAngle[i] = currentAngle;
