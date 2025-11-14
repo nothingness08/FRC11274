@@ -47,6 +47,7 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
 
   private double[] lastAngle = {0, 0, 0, 0};
   private double[] offset = {0, 0, 0, 0};
+  private double[] rotAngles = {45, -45, 135, -135};
   
   // private double lastAngle = 0;
   // private double offset = 0;
@@ -117,6 +118,9 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
     for(int i = 0; i < moduleStates.length; i++) {
       SwerveModuleState state = moduleStates[i];
       double currentAngle = state.angle.getDegrees();
+      if(speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond != 0){
+        currentAngle = rotAngles[i];
+      } //check if spin correctly clockw and cclockw with joystick movement, wheels don't move
       double currentTick = getCurrentTick(currentAngle, i);
       lastAngle[i] = currentAngle;
       m_AngleMotor[i].set(TalonSRXControlMode.Position, currentTick);
