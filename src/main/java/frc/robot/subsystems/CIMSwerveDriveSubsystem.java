@@ -114,28 +114,28 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
     SwerveModuleState[] moduleStates = SwerveDriveConstants.KINEMATICS.toSwerveModuleStates(speeds);
     //SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, SwerveDriveConstants.kMaxSpeedMetersPerSecond);
     //SwerveDriveKinematics.normalizeWheelSpeeds(moduleStates, SwerveDrive.MAX_SPEED_METERS_PER_SECOND);
-    
+    System.out.println(speeds.omegaRadiansPerSecond);
+
     for(int i = 0; i < moduleStates.length; i++) {
       SwerveModuleState state = moduleStates[i];
       double currentAngle;
       if(speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond != 0){
         currentAngle = rotAngles[i];
+        m_DriveMotor[i].set(TalonSRXControlMode.PercentOutput, speeds.omegaRadiansPerSecond*SwerveDriveConstants.MAXPERCENTOUTPUT);
+        m_backLeftDriveMotor.set(TalonSRXControlMode.PercentOutput, speeds.omegaRadiansPerSecond*SwerveDriveConstants.MAXPERCENTOUTPUT);
       } else if(speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond == 0){
         currentAngle = lastAngle[i];
+        m_DriveMotor[i].set(TalonSRXControlMode.PercentOutput, 0);
       } 
       else{
         currentAngle = state.angle.getDegrees();
-      } //check if spin correctly clockw and cclockw with joystick movement, wheels don't move
+        m_DriveMotor[i].set(TalonSRXControlMode.PercentOutput, SwerveDriveConstants.MAXPERCENTOUTPUT);
+        m_backLeftDriveMotor.set(TalonSRXControlMode.PercentOutput, SwerveDriveConstants.MAXPERCENTOUTPUT);
+      } 
+
       double currentTick = getCurrentTick(currentAngle, i);
       lastAngle[i] = currentAngle;
       m_AngleMotor[i].set(TalonSRXControlMode.Position, currentTick);
-      //m_DriveMotor[i].set(TalonSRXControlMode.PercentOutput, state.speedMetersPerSecond * SwerveDriveConstants.MAXPERCENTOUTPUT);
-      if(speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond == 0) {
-        m_DriveMotor[i].set(TalonSRXControlMode.PercentOutput, 0);
-      } else {
-        m_DriveMotor[i].set(TalonSRXControlMode.PercentOutput, SwerveDriveConstants.MAXPERCENTOUTPUT);
-        m_backLeftDriveMotor.set(TalonSRXControlMode.PercentOutput, SwerveDriveConstants.MAXPERCENTOUTPUT);
-      }
     }
   }
 
