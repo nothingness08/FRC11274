@@ -47,7 +47,7 @@ public final class Constants {
 
     public static final int TICKS_PER_REVOLUTION = 4096;
 
-    public static final double MAXPERCENTOUTPUT = 0.4; 
+    public static final double MAXPERCENTOUTPUT = 0.2; 
   }
 
   public static final class OIConstants {

@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.io.PrintStream;
+
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
@@ -30,6 +32,7 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
     m_backRightAngleMotor
   };
 
+  float rpm[];
   private final WPI_TalonSRX m_frontLeftDriveMotor = new WPI_TalonSRX(SwerveDriveConstants.FRONT_LEFT_DRIVE_MOTOR_ID);
   private final WPI_TalonSRX m_frontRightDriveMotor = new WPI_TalonSRX(SwerveDriveConstants.FRONT_RIGHT_DRIVE_MOTOR_ID);
   private final WPI_TalonSRX m_backLeftDriveMotor = new WPI_TalonSRX(SwerveDriveConstants.BACK_LEFT_DRIVE_MOTOR_ID);
@@ -45,6 +48,11 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
   private double[] lastAngle = {0, 0, 0, 0};
   private double[] offset = {0, 0, 0, 0};
   
+  // private double lastAngle = 0;
+  // private double offset = 0;
+  // private double currentTick = 0;
+  // private double currentAngle = 0;
+
   public CIMSwerveDriveSubsystem() {
     //make this for loop to initialize all 4 modules
     for(WPI_TalonSRX angleMotor : m_AngleMotor) {
@@ -53,7 +61,7 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
       angleMotor.configSelectedFeedbackSensor(TalonSRXFeedbackDevice.CTRE_MagEncoder_Absolute, 0, 10);
 
       angleMotor.setSensorPhase(true);
-      angleMotor.setInverted(false);
+      angleMotor.setInverted(true);
 
       angleMotor.configNominalOutputForward(0, 10); 
       angleMotor.configNominalOutputReverse(0, 10);
@@ -68,6 +76,19 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
 
       angleMotor.setSelectedSensorPosition(0, 0, 10);
     }
+
+    for(WPI_TalonSRX driveMotor : m_DriveMotor) {
+      driveMotor.configFactoryDefault();
+
+      driveMotor.setInverted(false);
+
+      driveMotor.configNominalOutputForward(0, 10); 
+      driveMotor.configNominalOutputReverse(0, 10);
+      driveMotor.configPeakOutputForward(1, 10);
+      driveMotor.configPeakOutputReverse(-1, 10);
+
+      driveMotor.set(TalonSRXControlMode.PercentOutput, 0);
+    }
   }
 
   
@@ -75,16 +96,16 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
     return ((theta - 90) / 360.0) * SwerveDriveConstants.TICKS_PER_REVOLUTION;
   }
 
-  public double getCurrentTick(double currentAngle, double lastAngle, double offset) {
-    double delta = currentAngle - lastAngle;
+  public double getCurrentTick(double currentAngle, int moduleIndex) {
+    double delta = currentAngle - lastAngle[moduleIndex];
     
     if (delta > 180) {
-      offset -= 360;
+      offset[moduleIndex] -= 360;
     } else if (delta < -180) {
-      offset += 360;
+      offset[moduleIndex] += 360;
     }
     
-    double currentTick = thetaToTick(currentAngle + offset);
+    double currentTick = thetaToTick(currentAngle + offset[moduleIndex]);
     return currentTick;
   }
 
@@ -96,24 +117,29 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
     for(int i = 0; i < moduleStates.length; i++) {
       SwerveModuleState state = moduleStates[i];
       double currentAngle = state.angle.getDegrees();
-      double currentTick = getCurrentTick(currentAngle, lastAngle[i], offset[i]);
+      double currentTick = getCurrentTick(currentAngle, i);
       lastAngle[i] = currentAngle;
       m_AngleMotor[i].set(TalonSRXControlMode.Position, currentTick);
-      m_DriveMotor[i].set(TalonSRXControlMode.PercentOutput, state.speedMetersPerSecond * SwerveDriveConstants.MAXPERCENTOUTPUT);
+      //m_DriveMotor[i].set(TalonSRXControlMode.PercentOutput, state.speedMetersPerSecond * SwerveDriveConstants.MAXPERCENTOUTPUT);
+      if(speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond == 0) {
+        m_DriveMotor[i].set(TalonSRXControlMode.PercentOutput, 0);
+      } else {
+        m_DriveMotor[i].set(TalonSRXControlMode.PercentOutput, SwerveDriveConstants.MAXPERCENTOUTPUT);
+        m_backLeftDriveMotor.set(TalonSRXControlMode.PercentOutput, SwerveDriveConstants.MAXPERCENTOUTPUT);
+      }
     }
-    
-    //SwerveModuleState frontLeftAngleState = moduleStates[0];
-
-    //double currentAngle = frontLeftAngleState.angle.getDegrees();
-  
-    //currentTick = getCurrentTick(currentAngle);
-    //lastAngle = currentAngle;
-    //m_frontLeftAngleMotor.set(TalonSRXControlMode.Position, currentTick);
-    
   }
 
   @Override
   public void periodic() {
-    //SmartDashboard.putNumber("Current Tick: ", currentTick);
+    SmartDashboard.putNumber("Current Tick FL: ", m_AngleMotor[0].getSelectedSensorPosition());
+    SmartDashboard.putNumber("Current Tick FR: ", m_AngleMotor[1].getSelectedSensorPosition());
+    SmartDashboard.putNumber("Current Tick BL: ", m_AngleMotor[2].getSelectedSensorPosition());
+    SmartDashboard.putNumber("Current Tick BR: ", m_AngleMotor[3].getSelectedSensorPosition());
+
+    SmartDashboard.putNumber("Target Angle FL: ", lastAngle[0]);
+    SmartDashboard.putNumber("Target Angle FR: ", lastAngle[1]);
+    SmartDashboard.putNumber("Target Angle BL: ", lastAngle[2]);
+    SmartDashboard.putNumber("Target Angle BR: ", lastAngle[3]);
   }
 }
