@@ -35,10 +35,6 @@ public class DriveWithJoystick extends Command {
     double ySpeed = -m_controller.getLeftY();
     double rot = m_controller.getRightX();
 
-    // Apply a deadband
-    //xSpeed = Math.abs(xSpeed) > OIConstants.CONTROLLER_DEADBAND ? xSpeed : 0.0;
-    //ySpeed = Math.abs(ySpeed) > OIConstants.CONTROLLER_DEADBAND ? ySpeed : 0.0;
-
     double mag = Math.sqrt(Math.pow(ySpeed, 2) + Math.pow(xSpeed, 2));
     if(mag < OIConstants.CONTROLLER_DEADBAND) {
       xSpeed = 0.0;
@@ -50,14 +46,14 @@ public class DriveWithJoystick extends Command {
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, rot);
 
     // Pass the speeds to the subsystem's drive method
-    m_swerveDrive.drive(chassisSpeeds);
+    m_swerveDrive.drive(chassisSpeeds, true);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     // Stop the robot when the command stops
-    m_swerveDrive.drive(new ChassisSpeeds(0, 0, 0));
+    m_swerveDrive.drive(new ChassisSpeeds(0, 0, 0), true);
   }
 
   // Returns true when the command should end.

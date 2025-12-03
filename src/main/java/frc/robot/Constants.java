@@ -23,15 +23,15 @@ public final class Constants {
     public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI; // Maximum angular speed
 
     //Edit this with pheonix turner IDs
-    public static final int FRONT_LEFT_ANGLE_MOTOR_ID = 0; //correct
-    public static final int FRONT_RIGHT_ANGLE_MOTOR_ID = 15; //correct
-    public static final int BACK_LEFT_ANGLE_MOTOR_ID = 1; //correct
-    public static final int BACK_RIGHT_ANGLE_MOTOR_ID = 3;
+    public static final int FRONT_LEFT_ANGLE_MOTOR_ID = 0; 
+    public static final int FRONT_RIGHT_ANGLE_MOTOR_ID = 15; 
+    public static final int BACK_LEFT_ANGLE_MOTOR_ID = 2; 
+    public static final int BACK_RIGHT_ANGLE_MOTOR_ID = 13;
 
-    public static final int FRONT_LEFT_DRIVE_MOTOR_ID = 2; //correct
-    public static final int FRONT_RIGHT_DRIVE_MOTOR_ID = 14; //correct
-    public static final int BACK_LEFT_DRIVE_MOTOR_ID = 3; //correct 
-    public static final int BACK_RIGHT_DRIVE_MOTOR_ID = 7;
+    public static final int FRONT_LEFT_DRIVE_MOTOR_ID = 1; 
+    public static final int FRONT_RIGHT_DRIVE_MOTOR_ID = 14; 
+    public static final int BACK_LEFT_DRIVE_MOTOR_ID = 3; 
+    public static final int BACK_RIGHT_DRIVE_MOTOR_ID = 12;
 
     public static final Translation2d FRONT_LEFT_LOCATION = new Translation2d(robotWidth / 2, robotLength / 2);
     public static final Translation2d FRONT_RIGHT_LOCATION = new Translation2d(robotWidth / 2, -robotLength / 2);
@@ -47,7 +47,13 @@ public final class Constants {
 
     public static final int TICKS_PER_REVOLUTION = 4096;
 
-    public static final double MAXPERCENTOUTPUT = 0.2; 
+    public static final double MAXPERCENTOUTPUT = 0.1; 
+
+    public static final String CANbus = "rio";
+  }
+
+  public static final class PigeonConstants {
+    public static final int PIGEON_ID = 10;
   }
 
   public static final class OIConstants {

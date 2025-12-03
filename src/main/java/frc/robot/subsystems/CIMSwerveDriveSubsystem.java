@@ -13,10 +13,13 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveDriveConstants;
 
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.hardware.core.CoreTalonFX;
 
 public class CIMSwerveDriveSubsystem extends SubsystemBase {
   //put this into array later for all 4 modules
@@ -32,13 +35,12 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
     m_backRightAngleMotor
   };
 
-  float rpm[];
-  private final WPI_TalonSRX m_frontLeftDriveMotor = new WPI_TalonSRX(SwerveDriveConstants.FRONT_LEFT_DRIVE_MOTOR_ID);
-  private final WPI_TalonSRX m_frontRightDriveMotor = new WPI_TalonSRX(SwerveDriveConstants.FRONT_RIGHT_DRIVE_MOTOR_ID);
-  private final WPI_TalonSRX m_backLeftDriveMotor = new WPI_TalonSRX(SwerveDriveConstants.BACK_LEFT_DRIVE_MOTOR_ID);
-  private final WPI_TalonSRX m_backRightDriveMotor = new WPI_TalonSRX(SwerveDriveConstants.BACK_RIGHT_DRIVE_MOTOR_ID);
+  private final TalonFX m_frontLeftDriveMotor = new TalonFX(SwerveDriveConstants.FRONT_LEFT_DRIVE_MOTOR_ID, SwerveDriveConstants.CANbus);
+  private final TalonFX m_frontRightDriveMotor = new TalonFX(SwerveDriveConstants.FRONT_RIGHT_DRIVE_MOTOR_ID, SwerveDriveConstants.CANbus);
+  private final TalonFX m_backLeftDriveMotor = new TalonFX(SwerveDriveConstants.BACK_LEFT_DRIVE_MOTOR_ID, SwerveDriveConstants.CANbus);
+  private final TalonFX m_backRightDriveMotor = new TalonFX(SwerveDriveConstants.BACK_RIGHT_DRIVE_MOTOR_ID, SwerveDriveConstants.CANbus);
 
-  private final WPI_TalonSRX[]  m_DriveMotor= {
+  private final TalonFX[]  m_DriveMotor= {
     m_frontLeftDriveMotor,
     m_frontRightDriveMotor,
     m_backLeftDriveMotor,
@@ -48,11 +50,6 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
   private double[] lastAngle = {0, 0, 0, 0};
   private double[] offset = {0, 0, 0, 0};
   private double[] rotAngles = {45, -45, 135, -135};
-  
-  // private double lastAngle = 0;
-  // private double offset = 0;
-  // private double currentTick = 0;
-  // private double currentAngle = 0;
 
   public CIMSwerveDriveSubsystem() {
     //make this for loop to initialize all 4 modules
@@ -78,17 +75,16 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
       angleMotor.setSelectedSensorPosition(0, 0, 10);
     }
 
-    for(WPI_TalonSRX driveMotor : m_DriveMotor) {
-      driveMotor.configFactoryDefault();
+    for(TalonFX driveMotor : m_DriveMotor) {
+      TalonFXConfiguration configs = new TalonFXConfiguration();
 
-      driveMotor.setInverted(false);
+      configs.Slot0.kP = SwerveDriveConstants.kP;
+      configs.Slot0.kI = SwerveDriveConstants.kI;
+      configs.Slot0.kD = SwerveDriveConstants.kD;
+      configs.Slot0.kV = 2;
+      
+      driveMotor.getConfigurator().apply(configs);
 
-      driveMotor.configNominalOutputForward(0, 10); 
-      driveMotor.configNominalOutputReverse(0, 10);
-      driveMotor.configPeakOutputForward(1, 10);
-      driveMotor.configPeakOutputReverse(-1, 10);
-
-      driveMotor.set(TalonSRXControlMode.PercentOutput, 0);
     }
   }
 
@@ -110,29 +106,28 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
     return currentTick;
   }
 
-  public void drive(ChassisSpeeds speeds){
+  public void drive(ChassisSpeeds speeds, boolean fieldRelative) {
     SwerveModuleState[] moduleStates = SwerveDriveConstants.KINEMATICS.toSwerveModuleStates(speeds);
     //SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, SwerveDriveConstants.kMaxSpeedMetersPerSecond);
     //SwerveDriveKinematics.normalizeWheelSpeeds(moduleStates, SwerveDrive.MAX_SPEED_METERS_PER_SECOND);
-    System.out.println(speeds.omegaRadiansPerSecond);
 
     for(int i = 0; i < moduleStates.length; i++) {
       SwerveModuleState state = moduleStates[i];
       double currentAngle;
+      double desiredPercentOutput = 0;
+
       if(speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond != 0){
         currentAngle = rotAngles[i];
-        m_DriveMotor[i].set(TalonSRXControlMode.PercentOutput, speeds.omegaRadiansPerSecond*SwerveDriveConstants.MAXPERCENTOUTPUT);
-        m_backLeftDriveMotor.set(TalonSRXControlMode.PercentOutput, speeds.omegaRadiansPerSecond*SwerveDriveConstants.MAXPERCENTOUTPUT);
+        desiredPercentOutput = SwerveDriveConstants.MAXPERCENTOUTPUT * Math.signum(speeds.omegaRadiansPerSecond);
       } else if(speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond == 0){
         currentAngle = lastAngle[i];
-        m_DriveMotor[i].set(TalonSRXControlMode.PercentOutput, 0);
-      } 
+      }
       else{
         currentAngle = state.angle.getDegrees();
-        m_DriveMotor[i].set(TalonSRXControlMode.PercentOutput, SwerveDriveConstants.MAXPERCENTOUTPUT);
-        m_backLeftDriveMotor.set(TalonSRXControlMode.PercentOutput, SwerveDriveConstants.MAXPERCENTOUTPUT);
-      } 
-
+        desiredPercentOutput = SwerveDriveConstants.MAXPERCENTOUTPUT;
+      }
+      desiredPercentOutput *=-1;
+      m_DriveMotor[i].set(desiredPercentOutput);
       double currentTick = getCurrentTick(currentAngle, i);
       lastAngle[i] = currentAngle;
       m_AngleMotor[i].set(TalonSRXControlMode.Position, currentTick);
@@ -141,6 +136,7 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    
     SmartDashboard.putNumber("Current Tick FL: ", m_AngleMotor[0].getSelectedSensorPosition());
     SmartDashboard.putNumber("Current Tick FR: ", m_AngleMotor[1].getSelectedSensorPosition());
     SmartDashboard.putNumber("Current Tick BL: ", m_AngleMotor[2].getSelectedSensorPosition());
