@@ -4,19 +4,43 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.configs.Pigeon2Configuration;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.libs.LimelightHelpers;
-import frc.robot.Constants.PigeonConstants;;
+import frc.robot.Constants.PigeonConstants;
 
 public class Pigeon extends SubsystemBase {
-
-
+  Pigeon2 pigeon = new Pigeon2(PigeonConstants.PIGEON_ID);
+  
   public Pigeon() {
+    Pigeon2Configuration configs = new Pigeon2Configuration();
+    configs.MountPose.MountPoseYaw = 0;
+    configs.MountPose.MountPosePitch = 0;
+    configs.MountPose.MountPoseRoll = 0;
+    // This Pigeon has no need to trim the gyro
+    configs.GyroTrim.GyroScalarX = 0;
+    configs.GyroTrim.GyroScalarY = 0;
+    configs.GyroTrim.GyroScalarZ = 0;
+    // We want the thermal comp and no-motion cal enabled, with the compass disabled for best behavior
+    configs.Pigeon2Features.DisableNoMotionCalibration = false;
+    configs.Pigeon2Features.DisableTemperatureCompensation = false;
+    configs.Pigeon2Features.EnableCompass = false;
     
+    // Write these configs to the Pigeon2
+    pigeon.getConfigurator().apply(configs);
+
+    pigeon.setYaw(0);
+  }
+
+  double getYaw(){
+    var yaw = pigeon.getYaw().refresh();
+    return yaw.getValueAsDouble();
   }
 
   @Override
   public void periodic() {
-    
+    SmartDashboard.putNumber("Yaw: ", getYaw());
   }
 }

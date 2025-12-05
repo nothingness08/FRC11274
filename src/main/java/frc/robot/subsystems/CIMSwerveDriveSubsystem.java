@@ -20,6 +20,10 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.core.CoreTalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import frc.robot.subsystems.Pigeon;
+import frc.robot.subsystems.LimelightSubsystem;
 
 public class CIMSwerveDriveSubsystem extends SubsystemBase {
   //put this into array later for all 4 modules
@@ -51,6 +55,8 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
   private double[] offset = {0, 0, 0, 0};
   private double[] rotAngles = {45, -45, 135, -135};
 
+  private Pigeon m_pigeon = new Pigeon();
+    
   public CIMSwerveDriveSubsystem() {
     //make this for loop to initialize all 4 modules
     for(WPI_TalonSRX angleMotor : m_AngleMotor) {
@@ -124,7 +130,10 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
       }
       else{
         currentAngle = state.angle.getDegrees();
-        desiredPercentOutput = SwerveDriveConstants.MAXPERCENTOUTPUT;
+        if(fieldRelative){
+          currentAngle -= m_pigeon.getYaw();
+        }
+        desiredPercentOutput = SwerveDriveConstants.MAXPERCENTOUTPUT * state.speedMetersPerSecond;
       }
       desiredPercentOutput *=-1;
       m_DriveMotor[i].set(desiredPercentOutput);
@@ -136,11 +145,10 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    
-    SmartDashboard.putNumber("Current Tick FL: ", m_AngleMotor[0].getSelectedSensorPosition());
-    SmartDashboard.putNumber("Current Tick FR: ", m_AngleMotor[1].getSelectedSensorPosition());
-    SmartDashboard.putNumber("Current Tick BL: ", m_AngleMotor[2].getSelectedSensorPosition());
-    SmartDashboard.putNumber("Current Tick BR: ", m_AngleMotor[3].getSelectedSensorPosition());
+    SmartDashboard.putNumber("Actual Tick FL: ", m_AngleMotor[0].getSelectedSensorPosition());
+    SmartDashboard.putNumber("Actual Tick FR: ", m_AngleMotor[1].getSelectedSensorPosition());
+    SmartDashboard.putNumber("Actual Tick BL: ", m_AngleMotor[2].getSelectedSensorPosition());
+    SmartDashboard.putNumber("Actual Tick BR: ", m_AngleMotor[3].getSelectedSensorPosition());
 
     SmartDashboard.putNumber("Target Angle FL: ", lastAngle[0]);
     SmartDashboard.putNumber("Target Angle FR: ", lastAngle[1]);
