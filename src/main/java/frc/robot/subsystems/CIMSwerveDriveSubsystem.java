@@ -15,6 +15,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveDriveConstants;
+import frc.robot.libs.LimelightHelpers;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -56,7 +57,8 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
   private double[] rotAngles = {45, -45, 135, -135};
 
   private Pigeon m_pigeon = new Pigeon();
-    
+  private LimelightSubsystem m_limelight = new LimelightSubsystem();
+  
   public CIMSwerveDriveSubsystem() {
     //make this for loop to initialize all 4 modules
     for(WPI_TalonSRX angleMotor : m_AngleMotor) {
@@ -154,5 +156,7 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Target Angle FR: ", lastAngle[1]);
     SmartDashboard.putNumber("Target Angle BL: ", lastAngle[2]);
     SmartDashboard.putNumber("Target Angle BR: ", lastAngle[3]);
+
+    SmartDashboard.putBoolean("Has Target", m_limelight.hasTarget());
   }
 }

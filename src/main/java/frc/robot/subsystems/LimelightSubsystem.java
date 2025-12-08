@@ -7,45 +7,45 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.libs.LimelightHelpers;
-
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-
 
 public class LimelightSubsystem extends SubsystemBase {
   //private NetworkTable limelightTable;
-  double x, y, area;
-  NetworkTableEntry tx, ty, ta;
-  boolean hasTarget;
-  double heightOfTag = 0.591, heightOfCamera = 0.325; //meters, CHANGE HEIGHT OF CAMERA
+  private static final double TAG_HEIGHT = 0.591, CAMERA_HEIGHT = 0.325; //meters, CHANGE HEIGHT OF CAMERA
+  private static final String LIMELIGHT_NAME = "limelight"; 
+
+  private static NetworkTable limelightTable = NetworkTableInstance.getDefault().getTable(LIMELIGHT_NAME);
 
   public LimelightSubsystem() {
-    LimelightHelpers.setPipelineIndex("", 0);
-    NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
-    tx = table.getEntry("tx");
-    ty = table.getEntry("ty");
-    ta = table.getEntry("ta");
+    LimelightHelpers.setPipelineIndex(LIMELIGHT_NAME, 0);
+  }
+  /**
+   * Calculates the estimated X (sideways) and Y (forward) distance to the target.
+   * @return A double array where index 0 is DX and index 1 is DY.
+   */
+  // public double[] getDxDy(){
+  //   double tx = LimelightHelpers.getTX(LIMELIGHT_NAME);
+  //   double ty = LimelightHelpers.getTY(LIMELIGHT_NAME);
+
+  //   if (!LimelightHelpers.getTV(LIMELIGHT_NAME)) {
+  //     return new double[]{0.0, 0.0}; // Return 0s if no target is found
+  //   }
+  //   double heightDifference = TAG_HEIGHT - CAMERA_HEIGHT;
+  //   double dy = heightDifference / Math.tan(Math.toRadians(ty));
+  //   double dx = dy * Math.tan(Math.toRadians(tx));
+  //   return new double[]{dx, dy};
+  // }
+
+  public double getDoubleEntry(String key) {
+    return limelightTable.getEntry(key).getDouble(0);
   }
 
-  double[] getDxDy(){
-    double heightDifference = heightOfTag - heightOfCamera;
-    double dy = heightDifference / Math.tan(Math.toRadians(y));
-    double dx = dy * Math.tan(Math.toRadians(x));
-    return new double[]{dx, dy};
+  public boolean hasTarget() {
+    return LimelightHelpers.getTV(LIMELIGHT_NAME);
   }
 
   @Override
   public void periodic() {
-    double x = tx.getDouble(0.0);
-    double y = ty.getDouble(0.0);
-    double area = ta.getDouble(0.0);
-
-
-    SmartDashboard.putNumber("Limelight TX", x);
-    SmartDashboard.putNumber("Limelight TY", y);
-    SmartDashboard.putNumber("Limelight DX", getDxDy()[0]);
-    SmartDashboard.putNumber("Limelight DY", getDxDy()[1]);
   }
 }
