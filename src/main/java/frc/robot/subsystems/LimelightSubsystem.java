@@ -42,7 +42,7 @@ public class LimelightSubsystem extends SubsystemBase {
   }
 
   public boolean hasTarget() {
-    return LimelightHelpers.getTV(LIMELIGHT_NAME);
+    return getDoubleEntry("tv") == 1.0;
   }
 
   @Override
