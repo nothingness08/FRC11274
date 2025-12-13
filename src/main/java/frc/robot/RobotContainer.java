@@ -12,11 +12,14 @@ import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.Pigeon;
-import frc.robot.subsystems.CIMSwerveDriveSubsystem;
+import frc.robot.subsystems.SwerveDriveSubsystem;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.SimpleAuto;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -25,14 +28,27 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  private final XboxController m_driverController = new XboxController(OIConstants.DRIVER_CONTROLLER_PORT);
+  private final CommandXboxController  m_driverController = new CommandXboxController (OIConstants.DRIVER_CONTROLLER_PORT);
 
-  private final CIMSwerveDriveSubsystem m_swerveDriveSubsystem = new CIMSwerveDriveSubsystem();
-  
+  private final Pigeon m_pigeon = new Pigeon();
+  private final SwerveDriveSubsystem m_swerveDriveSubsystem = new SwerveDriveSubsystem(m_pigeon);
+  private final Command m_simpleAuto = new SimpleAuto(m_swerveDriveSubsystem, m_pigeon);
+
+  Trigger xButton = m_driverController.x();
+
+  //private final Command m_complexAuto = new ComplexAuto(m_robotDrive, m_hatchSubsystem);
+
+  SendableChooser<Command> m_chooser = new SendableChooser<>();
+
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
+
+    m_chooser.setDefaultOption("Simple Auto", m_simpleAuto);
+    //m_chooser.addOption("Complex Auto", m_complexAuto);
+    SmartDashboard.putData("Auto Mode",m_chooser);
 
     // Set the default command for the swerve drive to be joystick control
     m_swerveDriveSubsystem.setDefaultCommand(
@@ -42,8 +58,7 @@ public class RobotContainer {
 
   private void configureButtonBindings() { //gemini
     // Example of mapping a button to a command:
-    // new JoystickButton(m_driverController, Button.kR1.value)
-    //     .whileTrue(new RunCommand(() -> m_swerveDriveSubsystem.zeroGyroscope(), m_swerveDriveSubsystem));
+    xButton.onTrue(new SimpleAuto(m_swerveDriveSubsystem, m_pigeon));
   }
 
   /**
@@ -53,6 +68,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return null;
+    return m_chooser.getSelected();
+    //return null;
   }
 }

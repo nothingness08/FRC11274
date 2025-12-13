@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveDriveConstants;
 import frc.robot.libs.LimelightHelpers;
 
+
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -26,7 +27,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.robot.subsystems.Pigeon;
 import frc.robot.subsystems.LimelightSubsystem;
 
-public class CIMSwerveDriveSubsystem extends SubsystemBase {
+public class SwerveDriveSubsystem extends SubsystemBase {
   //put this into array later for all 4 modules
   private final WPI_TalonSRX m_frontLeftAngleMotor = new WPI_TalonSRX(SwerveDriveConstants.FRONT_LEFT_ANGLE_MOTOR_ID);
   private final WPI_TalonSRX m_frontRightAngleMotor = new WPI_TalonSRX(SwerveDriveConstants.FRONT_RIGHT_ANGLE_MOTOR_ID);
@@ -54,12 +55,15 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
 
   private double[] lastAngle = {0, 0, 0, 0};
   private double[] offset = {0, 0, 0, 0};
+  private double[] targetTick = {0, 0, 0, 0};
+
   private double[] rotAngles = {45, -45, 135, -135};
 
-  private Pigeon m_pigeon = new Pigeon();
   private LimelightSubsystem m_limelight = new LimelightSubsystem();
   
-  public CIMSwerveDriveSubsystem() {
+  private Pigeon m_pigeon;
+
+  public SwerveDriveSubsystem(Pigeon pigeon) {
     //make this for loop to initialize all 4 modules
     for(WPI_TalonSRX angleMotor : m_AngleMotor) {
       angleMotor.configFactoryDefault();
@@ -91,9 +95,12 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
       configs.Slot0.kD = SwerveDriveConstants.kD;
       configs.Slot0.kV = 2;
       
+      configs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
       driveMotor.getConfigurator().apply(configs);
 
     }
+    m_pigeon = pigeon;
   }
 
   
@@ -140,6 +147,7 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
       desiredPercentOutput *=-1;
       m_DriveMotor[i].set(desiredPercentOutput);
       double currentTick = getCurrentTick(currentAngle, i);
+      targetTick[i] = currentTick;
       lastAngle[i] = currentAngle;
       m_AngleMotor[i].set(TalonSRXControlMode.Position, currentTick);
     }
@@ -152,11 +160,14 @@ public class CIMSwerveDriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Actual Tick BL: ", m_AngleMotor[2].getSelectedSensorPosition());
     SmartDashboard.putNumber("Actual Tick BR: ", m_AngleMotor[3].getSelectedSensorPosition());
 
+    SmartDashboard.putNumber("Delta Tick FL: ", Math.abs(targetTick[0] - m_AngleMotor[0].getSelectedSensorPosition()));
+    SmartDashboard.putNumber("Delta Tick FR: ", Math.abs(targetTick[1] - m_AngleMotor[1].getSelectedSensorPosition()));
+    SmartDashboard.putNumber("Delta Tick BL: ", Math.abs(targetTick[2] - m_AngleMotor[2].getSelectedSensorPosition()));
+    SmartDashboard.putNumber("Delta Tick BR: ", Math.abs(targetTick[3] - m_AngleMotor[3].getSelectedSensorPosition()));
+
     SmartDashboard.putNumber("Target Angle FL: ", lastAngle[0]);
     SmartDashboard.putNumber("Target Angle FR: ", lastAngle[1]);
     SmartDashboard.putNumber("Target Angle BL: ", lastAngle[2]);
     SmartDashboard.putNumber("Target Angle BR: ", lastAngle[3]);
-
-    SmartDashboard.putBoolean("Has Target", m_limelight.hasTarget());
   }
 }

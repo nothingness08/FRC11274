@@ -34,7 +34,7 @@ public class Pigeon extends SubsystemBase {
     pigeon.setYaw(0);
   }
 
-  double getYaw(){
+  public double getYaw(){
     var yaw = pigeon.getYaw().refresh();
     return yaw.getValueAsDouble();
   }
