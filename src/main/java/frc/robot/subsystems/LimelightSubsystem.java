@@ -10,10 +10,11 @@ import frc.robot.libs.LimelightHelpers;
 
 public class LimelightSubsystem extends SubsystemBase {
   private static final double TAG_HEIGHT = 0.591, CAMERA_HEIGHT = 0.35; //meters
-  private static final String LIMELIGHT_NAME = "limelight"; 
+  private static String LIMELIGHT_NAME; 
 
-  public LimelightSubsystem() {
+  public LimelightSubsystem(String name) {
     LimelightHelpers.setPipelineIndex(LIMELIGHT_NAME, 0);
+    LIMELIGHT_NAME = name;
   }
   /**
    * Calculates the estimated X (sideways) and Y (forward) distance to the target.
@@ -42,6 +43,13 @@ public class LimelightSubsystem extends SubsystemBase {
     double[] dxdy = getDxDy();
     SmartDashboard.putNumber("DX", dxdy[0]);
     SmartDashboard.putNumber("DY", dxdy[1]);
-    //System.out.println("Limelight TX: " + LimelightHelpers.getTX(LIMELIGHT_NAME));
+
+    double[] pose = LimelightHelpers.getBotPose_TargetSpace(LIMELIGHT_NAME);
+
+    // if (pose != null) {
+    //   SmartDashboard.putNumber("Robot X", pose[0]);
+    //   SmartDashboard.putNumber("Robot Y", pose[1]);
+    //   SmartDashboard.putNumber("Robot Rot", pose[4]);
+    // }
   }
 }
