@@ -51,7 +51,7 @@ public class SimpleAuto extends Command {
     double currentAngle = m_pigeon.getYaw();
     double turnSpeed = m_turnController.calculate(currentAngle);
 
-    m_swerveDrive.drive(new edu.wpi.first.math.kinematics.ChassisSpeeds(0, 0, -turnSpeed*TURN_SPEED), true);
+    m_swerveDrive.drive(new ChassisSpeeds(0, 0, -turnSpeed*TURN_SPEED), true);
   }
 
   // Called once the command ends or is interrupted.

@@ -33,6 +33,14 @@ public class LimelightSubsystem extends SubsystemBase {
     return new double[]{dx, dy};
   }
 
+  public boolean getTV(){
+    return LimelightHelpers.getTV(LIMELIGHT_NAME);
+  }
+
+  public double[] getBotPose_TargetSpace(){
+    double[] botPose_TargetSpace = LimelightHelpers.getBotPose_TargetSpace(LIMELIGHT_NAME);
+    return botPose_TargetSpace;
+  }
 
   @Override
   public void periodic() {
