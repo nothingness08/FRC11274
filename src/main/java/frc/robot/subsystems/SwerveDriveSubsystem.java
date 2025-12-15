@@ -59,11 +59,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
   private double[] rotAngles = {45, -45, 135, -135};
 
-  private LimelightSubsystem m_limelight = new LimelightSubsystem();
+  private LimelightSubsystem m_limelightTwo;
   
   private Pigeon m_pigeon;
 
-  public SwerveDriveSubsystem(Pigeon pigeon) {
+  public SwerveDriveSubsystem(Pigeon pigeon, LimelightSubsystem limelightTwo) {
     //make this for loop to initialize all 4 modules
     for(WPI_TalonSRX angleMotor : m_AngleMotor) {
       angleMotor.configFactoryDefault();
@@ -101,6 +101,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     }
     m_pigeon = pigeon;
+    m_limelightTwo = limelightTwo;
   }
 
   

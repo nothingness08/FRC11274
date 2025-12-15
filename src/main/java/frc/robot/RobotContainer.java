@@ -6,9 +6,6 @@ package frc.robot;
 
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
-import frc.robot.commands.DriveWithJoystick;
-import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.Pigeon;
@@ -19,7 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.SimpleAuto;
+import frc.robot.commands.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -31,8 +28,11 @@ public class RobotContainer {
   private final CommandXboxController  m_driverController = new CommandXboxController (OIConstants.DRIVER_CONTROLLER_PORT);
 
   private final Pigeon m_pigeon = new Pigeon();
-  private final SwerveDriveSubsystem m_swerveDriveSubsystem = new SwerveDriveSubsystem(m_pigeon);
+  private final LimelightSubsystem m_limelightTwo = new LimelightSubsystem(); //add name arguement when pull changes
+  private final SwerveDriveSubsystem m_swerveDriveSubsystem = new SwerveDriveSubsystem(m_pigeon, m_limelightTwo);
+  
   private final Command m_simpleAuto = new SimpleAuto(m_swerveDriveSubsystem, m_pigeon);
+  private final Command m_findAprilTagAuto = new FindAprilTagAuto(m_swerveDriveSubsystem, m_pigeon, m_limelightTwo);
 
   Trigger xButton = m_driverController.x();
 
@@ -47,7 +47,7 @@ public class RobotContainer {
     configureButtonBindings();
 
     m_chooser.setDefaultOption("Simple Auto", m_simpleAuto);
-    //m_chooser.addOption("Complex Auto", m_complexAuto);
+    m_chooser.addOption("FindAprilTagAuto", m_findAprilTagAuto);
     SmartDashboard.putData("Auto Mode",m_chooser);
 
     // Set the default command for the swerve drive to be joystick control

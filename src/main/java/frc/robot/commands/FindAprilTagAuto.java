@@ -12,16 +12,18 @@ import frc.robot.subsystems.*;
 public class FindAprilTagAuto extends Command {
   private final SwerveDriveSubsystem m_swerveDrive;
   private final Pigeon m_pigeon;
-
+  private final LimelightSubsystem m_limelightTwo;
+  private final double TURN_SPEED = 0.1;
   /*
   *
    * Creates a new ExampleCommand.
    *
    * @param m_swerveDrive The subsystem used by this command.
    */
-  public FindAprilTagAuto(SwerveDriveSubsystem swerveDrive, Pigeon pigeon) {
+  public FindAprilTagAuto(SwerveDriveSubsystem swerveDrive, Pigeon pigeon, LimelightSubsystem limelightTwo) {
     m_swerveDrive = swerveDrive;
     m_pigeon = pigeon;
+    m_limelightTwo = limelightTwo;
     
     // Set PID parameters
     // Use addRequirements() here to declare subsystem dependencies.
@@ -38,7 +40,7 @@ public class FindAprilTagAuto extends Command {
   public void execute() {
     double currentAngle = m_pigeon.getYaw();
 
-    m_swerveDrive.drive(new edu.wpi.first.math.kinematics.ChassisSpeeds(0, 0, 0), true);
+    m_swerveDrive.drive(new ChassisSpeeds(0, 0, TURN_SPEED), true);
   }
 
   // Called once the command ends or is interrupted.
@@ -50,6 +52,6 @@ public class FindAprilTagAuto extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return m_limelightTwo.getTV();
   }
 }
