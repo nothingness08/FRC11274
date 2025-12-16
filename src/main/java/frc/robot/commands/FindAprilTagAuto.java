@@ -13,7 +13,7 @@ public class FindAprilTagAuto extends Command {
   private final SwerveDriveSubsystem m_swerveDrive;
   private final Pigeon m_pigeon;
   private final LimelightSubsystem m_limelightTwo;
-  private final double TURN_SPEED = 0.1;
+  private final double TURN_SPEED = 0.015;
   /*
   *
    * Creates a new ExampleCommand.

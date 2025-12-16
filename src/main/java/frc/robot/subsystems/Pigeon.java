@@ -38,6 +38,9 @@ public class Pigeon extends SubsystemBase {
     var yaw = pigeon.getYaw().refresh();
     return yaw.getValueAsDouble();
   }
+  public double getRate(){
+    return pigeon.getAngularVelocityZWorld().getValueAsDouble();
+  }
 
   @Override
   public void periodic() {

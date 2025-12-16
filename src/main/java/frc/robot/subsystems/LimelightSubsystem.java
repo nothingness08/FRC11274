@@ -11,10 +11,23 @@ import frc.robot.libs.LimelightHelpers;
 public class LimelightSubsystem extends SubsystemBase {
   private static final double TAG_HEIGHT = 0.591, CAMERA_HEIGHT = 0.35; //meters
   private static String LIMELIGHT_NAME; 
+  private Pigeon m_pigeon;
 
-  public LimelightSubsystem(String name) {
-    LimelightHelpers.setPipelineIndex(LIMELIGHT_NAME, 0);
+  public LimelightSubsystem(String name, Pigeon pigeon) {
     LIMELIGHT_NAME = name;
+    m_pigeon = pigeon;
+    LimelightHelpers.setPipelineIndex(LIMELIGHT_NAME, 0);
+
+    if(LIMELIGHT_NAME == "limelight-two"){
+      LimelightHelpers.setCameraPose_RobotSpace(LIMELIGHT_NAME, 
+          0.1,    
+          0.0635,   
+          0.343,
+          0.0, 
+          0,  
+          4    
+      );
+    }
   }
   /**
    * Calculates the estimated X (sideways) and Y (forward) distance to the target.
@@ -42,6 +55,11 @@ public class LimelightSubsystem extends SubsystemBase {
     return botPose_TargetSpace;
   }
 
+  public double getRobotYaw(){
+    return m_pigeon.getYaw();
+  }
+  
+
   @Override
   public void periodic() {
     SmartDashboard.putBoolean("TV", LimelightHelpers.getTV(LIMELIGHT_NAME));
@@ -54,10 +72,10 @@ public class LimelightSubsystem extends SubsystemBase {
 
     double[] pose = LimelightHelpers.getBotPose_TargetSpace(LIMELIGHT_NAME);
 
-    // if (pose != null) {
-    //   SmartDashboard.putNumber("Robot X", pose[0]);
-    //   SmartDashboard.putNumber("Robot Y", pose[1]);
-    //   SmartDashboard.putNumber("Robot Rot", pose[4]);
-    // }
+    if (pose != null && pose.length >= 6) {
+      SmartDashboard.putNumber("Robot X", pose[0]);
+      SmartDashboard.putNumber("Robot Y", pose[1]);
+      SmartDashboard.putNumber("Robot Rot", pose[5]);
+    }
   }
 }

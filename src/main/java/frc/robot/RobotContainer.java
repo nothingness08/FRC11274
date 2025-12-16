@@ -28,7 +28,7 @@ public class RobotContainer {
   private final CommandXboxController  m_driverController = new CommandXboxController (OIConstants.DRIVER_CONTROLLER_PORT);
 
   private final Pigeon m_pigeon = new Pigeon();
-  private final LimelightSubsystem m_limelightTwo = new LimelightSubsystem(); //add name arguement when pull changes
+  private final LimelightSubsystem m_limelightTwo = new LimelightSubsystem("limelight-two", m_pigeon); //add name arguement when pull changes
   private final SwerveDriveSubsystem m_swerveDriveSubsystem = new SwerveDriveSubsystem(m_pigeon, m_limelightTwo);
   
   private final Command m_simpleAuto = new SimpleAuto(m_swerveDriveSubsystem, m_pigeon);
