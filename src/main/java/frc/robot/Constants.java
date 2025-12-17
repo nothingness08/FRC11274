@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
@@ -41,7 +42,7 @@ public final class Constants {
     public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(FRONT_LEFT_LOCATION, FRONT_RIGHT_LOCATION, BACK_LEFT_LOCATION, BACK_RIGHT_LOCATION);
 
     public static final double kF = 0.0;
-    public static final double kP = 0.3; //0.4
+    public static final double kP = 0.4; //0.4
     public static final double kI = 0.0; //0.0
     public static final double kD = 0.02; //0.01
 
@@ -51,6 +52,11 @@ public final class Constants {
     public static final double DRIVER_GEAR_RATIO = 6.86;
 
     public static final String CANbus = "rio";
+  }
+
+  public static final class AprilTagConstants {
+    public static final double TAG_X = 12.227;
+    public static final double TAG_Y = 4.026;
   }
 
   public static final class PigeonConstants {

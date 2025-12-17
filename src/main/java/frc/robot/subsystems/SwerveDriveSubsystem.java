@@ -20,6 +20,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.AprilTagConstants;
 import frc.robot.Constants.SwerveDriveConstants;
 import frc.robot.libs.LimelightHelpers;
 
@@ -34,8 +35,6 @@ import frc.robot.subsystems.Pigeon;
 import frc.robot.subsystems.LimelightSubsystem;
 
 public class SwerveDriveSubsystem extends SubsystemBase {
-  private final double TAG_X = 12.227; //temp
-  private final double TAG_Y = 4.026;//temp
 
   //put this into array later for all 4 modules
   private final WPI_TalonSRX m_frontLeftAngleMotor = new WPI_TalonSRX(SwerveDriveConstants.FRONT_LEFT_ANGLE_MOTOR_ID);
@@ -68,11 +67,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
   private double[] rotAngles = {45, -45, 135, -135};
 
-  private LimelightSubsystem m_limelightTwo;
   private final SwerveDrivePoseEstimator m_poseEstimator;
   private Pigeon m_pigeon;
 
-  public SwerveDriveSubsystem(Pigeon pigeon, LimelightSubsystem limelightTwo) {
+  public SwerveDriveSubsystem(Pigeon pigeon) {
     //make this for loop to initialize all 4 modules
     for(WPI_TalonSRX angleMotor : m_AngleMotor) {
       angleMotor.configFactoryDefault();
@@ -111,7 +109,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     m_pigeon = pigeon;
-    m_limelightTwo = limelightTwo;
     m_poseEstimator = new SwerveDrivePoseEstimator(
       SwerveDriveConstants.KINEMATICS,
       Rotation2d.fromDegrees(m_pigeon.getYaw()),
@@ -121,11 +118,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   }
 
   
-  public double thetaToTick(double theta) {
+  private double thetaToTick(double theta) {
     return ((theta - 90) / 360.0) * SwerveDriveConstants.TICKS_PER_REVOLUTION;
   }
 
-  public double getCurrentTick(double currentAngle, int moduleIndex) {
+  private double getCurrentTick(double currentAngle, int moduleIndex) {
     double delta = currentAngle - lastAngle[moduleIndex];
     
     if (delta > 180) {
@@ -142,6 +139,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     SwerveModuleState[] moduleStates = SwerveDriveConstants.KINEMATICS.toSwerveModuleStates(speeds);
     //SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, SwerveDriveConstants.kMaxSpeedMetersPerSecond);
     //SwerveDriveKinematics.normalizeWheelSpeeds(moduleStates, SwerveDrive.MAX_SPEED_METERS_PER_SECOND);
+    double[] deltas = getDeltaTarget();
 
     for(int i = 0; i < moduleStates.length; i++) {
       SwerveModuleState state = moduleStates[i];
@@ -162,6 +160,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         desiredPercentOutput = SwerveDriveConstants.MAXPERCENTOUTPUT * state.speedMetersPerSecond;
       }
       desiredPercentOutput *=-1;
+      
+      // if(deltas[i] > 200){ //set band for driving
+      //   desiredPercentOutput = 0;
+      // }
       m_DriveMotor[i].set(desiredPercentOutput);
       double currentTick = getCurrentTick(currentAngle, i);
       targetTick[i] = currentTick;
@@ -170,7 +172,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
   }
 
-  private SwerveModulePosition[] getModulePositions(){
+  public SwerveModulePosition[] getModulePositions(){
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
     for(int i = 0; i < 4; i++){
       double distanceMeters = (m_DriveMotor[i].getPosition().getValueAsDouble() / SwerveDriveConstants.DRIVER_GEAR_RATIO) * (Math.PI * 0.1016); //0.1016 is wheel diameter in meters
@@ -181,6 +183,21 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     return positions;
   }
 
+  private double[] getDeltaTarget(){
+    double[] deltas = new double[4];
+    for(int i = 0; i < 4; i++){
+      deltas[i] = Math.abs(targetTick[i] - m_AngleMotor[i].getSelectedSensorPosition());
+    }
+    return deltas;
+  }
+
+  public double[] getPoseEstimateWithTag(){
+    double[] pose = new double[3];
+    pose[0] = -(m_poseEstimator.getEstimatedPosition().getY() - AprilTagConstants.TAG_Y);
+    pose[1] = m_poseEstimator.getEstimatedPosition().getX() - AprilTagConstants.TAG_X;
+    pose[2] = m_poseEstimator.getEstimatedPosition().getRotation().getDegrees();
+    return pose;
+  }
   @Override
   public void periodic() {
     m_poseEstimator.update(
@@ -189,10 +206,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     );
     boolean doRejectUpdate = false;
     LimelightHelpers.SetRobotOrientation("limelight-two", 
-        m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 
-        0, 0, 0, 0, 0);
+      m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 
+      0, 0, 0, 0, 0);
     LimelightHelpers.PoseEstimate mt2 = 
-        LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-two");
+      LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-two");
 
     if (Math.abs(m_pigeon.getRate()) > 360) {
       doRejectUpdate = true;
@@ -207,21 +224,23 @@ public class SwerveDriveSubsystem extends SubsystemBase {
       m_poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
     }
 
-    SmartDashboard.putNumber("Estimated X", m_poseEstimator.getEstimatedPosition().getX() - TAG_X);
-    SmartDashboard.putNumber("Estimated Y", m_poseEstimator.getEstimatedPosition().getY() - TAG_Y);
+    double poseEstimate[] = getPoseEstimateWithTag();
+    // SmartDashboard.putNumber("Estimated X", poseEstimate[0]);
+    // SmartDashboard.putNumber("Estimated Y", poseEstimate[1]);
 
-    SmartDashboard.putNumber("Estimated X in", (m_poseEstimator.getEstimatedPosition().getX() - TAG_X)*39.37);
-    SmartDashboard.putNumber("Estimated Y in", (m_poseEstimator.getEstimatedPosition().getY() - TAG_Y)*39.37);
+    // SmartDashboard.putNumber("Estimated X in", poseEstimate[0]*39.37);
+    // SmartDashboard.putNumber("Estimated Y in", poseEstimate[1]*39.37);
 
     SmartDashboard.putNumber("Actual Tick FL: ", m_AngleMotor[0].getSelectedSensorPosition());
     SmartDashboard.putNumber("Actual Tick FR: ", m_AngleMotor[1].getSelectedSensorPosition());
     SmartDashboard.putNumber("Actual Tick BL: ", m_AngleMotor[2].getSelectedSensorPosition());
     SmartDashboard.putNumber("Actual Tick BR: ", m_AngleMotor[3].getSelectedSensorPosition());
 
-    SmartDashboard.putNumber("Delta Tick FL: ", Math.abs(targetTick[0] - m_AngleMotor[0].getSelectedSensorPosition()));
-    SmartDashboard.putNumber("Delta Tick FR: ", Math.abs(targetTick[1] - m_AngleMotor[1].getSelectedSensorPosition()));
-    SmartDashboard.putNumber("Delta Tick BL: ", Math.abs(targetTick[2] - m_AngleMotor[2].getSelectedSensorPosition()));
-    SmartDashboard.putNumber("Delta Tick BR: ", Math.abs(targetTick[3] - m_AngleMotor[3].getSelectedSensorPosition()));
+    double[] deltas = getDeltaTarget();
+    SmartDashboard.putNumber("Delta Tick FL: ", deltas[0]);
+    SmartDashboard.putNumber("Delta Tick FR: ", deltas[1]);
+    SmartDashboard.putNumber("Delta Tick BL: ", deltas[2]);
+    SmartDashboard.putNumber("Delta Tick BR: ", deltas[3]);
 
     SmartDashboard.putNumber("Target Angle FL: ", lastAngle[0]);
     SmartDashboard.putNumber("Target Angle FR: ", lastAngle[1]);
