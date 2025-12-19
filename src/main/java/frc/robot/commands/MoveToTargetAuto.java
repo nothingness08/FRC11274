@@ -12,9 +12,8 @@ import frc.robot.subsystems.*;
 /** An example command that uses an example subsystem. */
 public class MoveToTargetAuto extends Command {
   private final SwerveDriveSubsystem m_swerveDrive;
-  private final Pigeon m_pigeon;
-  private final LimelightSubsystem m_limelightTwo;
   private final PIDController xController, yController;
+  private final TelemetrySubsystem m_telemetrySubsystem;
 
   
   
@@ -25,12 +24,10 @@ public class MoveToTargetAuto extends Command {
    *
    * @param m_swerveDrive The subsystem used by this command.
    */
-  public MoveToTargetAuto(SwerveDriveSubsystem swerveDrive, Pigeon pigeon, LimelightSubsystem limelightTwo, double[] targetPos) {
+  public MoveToTargetAuto(SwerveDriveSubsystem swerveDrive, TelemetrySubsystem telemetrySubsystem, double[] targetPos) {
     m_swerveDrive = swerveDrive;
-    m_pigeon = pigeon;
-    m_limelightTwo = limelightTwo;
     this.targetPos = targetPos;
-    
+    m_telemetrySubsystem = telemetrySubsystem;
     xController = new PIDController(1, 0, 0.01); 
     yController = new PIDController(1, 0, 0.01);
     // Use addRequirements() here to declare subsystem dependencies.
@@ -45,8 +42,8 @@ public class MoveToTargetAuto extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double currentPos[] = m_swerveDrive.getPoseEstimateWithTag();
-    if(m_limelightTwo.getTV()){
+    double currentPos[] = m_telemetrySubsystem.getPoseEstimateWithTag();
+    if(m_telemetrySubsystem.getLimelightTV()){
       double xSpeed = xController.calculate(currentPos[0], targetPos[0]);
       double ySpeed = yController.calculate(currentPos[1], targetPos[1]); //make the end to within tolerance tomorrow
       m_swerveDrive.drive(new ChassisSpeeds(xSpeed, ySpeed, 0), true);
@@ -65,11 +62,11 @@ public class MoveToTargetAuto extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if(!m_limelightTwo.getTV()){
+    if(!m_telemetrySubsystem.getLimelightTV()){
       return true;
     }
-    double currentPos[] = m_swerveDrive.getPoseEstimateWithTag();
+    double currentPos[] = m_telemetrySubsystem.getPoseEstimateWithTag();
     double distance = Math.hypot(targetPos[0] - currentPos[0], targetPos[1] - currentPos[1]);
-    return distance < 0.06; // 10cm tolerance
+    return distance < 0.05; // 10cm tolerance
   }
 }

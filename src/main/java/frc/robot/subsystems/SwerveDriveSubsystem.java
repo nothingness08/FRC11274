@@ -139,7 +139,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     SwerveModuleState[] moduleStates = SwerveDriveConstants.KINEMATICS.toSwerveModuleStates(speeds);
     //SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, SwerveDriveConstants.kMaxSpeedMetersPerSecond);
     //SwerveDriveKinematics.normalizeWheelSpeeds(moduleStates, SwerveDrive.MAX_SPEED_METERS_PER_SECOND);
-    double[] deltas = getDeltaTarget();
 
     for(int i = 0; i < moduleStates.length; i++) {
       SwerveModuleState state = moduleStates[i];
@@ -161,9 +160,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
       }
       desiredPercentOutput *=-1;
       
-      // if(deltas[i] > 200){ //set band for driving
-      //   desiredPercentOutput = 0;
-      // }
       m_DriveMotor[i].set(desiredPercentOutput);
       double currentTick = getCurrentTick(currentAngle, i);
       targetTick[i] = currentTick;
@@ -191,45 +187,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     return deltas;
   }
 
-  public double[] getPoseEstimateWithTag(){
-    double[] pose = new double[3];
-    pose[0] = -(m_poseEstimator.getEstimatedPosition().getY() - AprilTagConstants.TAG_Y);
-    pose[1] = m_poseEstimator.getEstimatedPosition().getX() - AprilTagConstants.TAG_X;
-    pose[2] = m_poseEstimator.getEstimatedPosition().getRotation().getDegrees();
-    return pose;
-  }
   @Override
   public void periodic() {
-    m_poseEstimator.update(
-      Rotation2d.fromDegrees(m_pigeon.getYaw()),
-      getModulePositions()
-    );
-    boolean doRejectUpdate = false;
-    LimelightHelpers.SetRobotOrientation("limelight-two", 
-      m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 
-      0, 0, 0, 0, 0);
-    LimelightHelpers.PoseEstimate mt2 = 
-      LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-two");
-
-    if (Math.abs(m_pigeon.getRate()) > 360) {
-      doRejectUpdate = true;
-    }
-    if (mt2 != null && mt2.tagCount == 0) {
-      doRejectUpdate = true;
-    }
-
-    if (!doRejectUpdate && mt2 != null) {
-      // Trust vision for X/Y (0.7m error), ignore vision for rotation (999999 error)
-      m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 9999999));
-      m_poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
-    }
-
-    double poseEstimate[] = getPoseEstimateWithTag();
-    // SmartDashboard.putNumber("Estimated X", poseEstimate[0]);
-    // SmartDashboard.putNumber("Estimated Y", poseEstimate[1]);
-
-    // SmartDashboard.putNumber("Estimated X in", poseEstimate[0]*39.37);
-    // SmartDashboard.putNumber("Estimated Y in", poseEstimate[1]*39.37);
 
     SmartDashboard.putNumber("Actual Tick FL: ", m_AngleMotor[0].getSelectedSensorPosition());
     SmartDashboard.putNumber("Actual Tick FR: ", m_AngleMotor[1].getSelectedSensorPosition());

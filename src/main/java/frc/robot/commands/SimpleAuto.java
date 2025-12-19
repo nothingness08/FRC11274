@@ -12,7 +12,7 @@ import frc.robot.subsystems.*;
 /** An example command that uses an example subsystem. */
 public class SimpleAuto extends Command {
   private final SwerveDriveSubsystem m_swerveDrive;
-  private final Pigeon m_pigeon;
+  private final TelemetrySubsystem m_telemetrySubsystem;
   private final PIDController m_turnController;
   private double startAngle;
   private static final double TARGET_ANGLE_DEGREES = 360.0;
@@ -25,9 +25,9 @@ public class SimpleAuto extends Command {
    *
    * @param m_swerveDrive The subsystem used by this command.
    */
-  public SimpleAuto(SwerveDriveSubsystem swerveDrive, Pigeon pigeon) {
+  public SimpleAuto(SwerveDriveSubsystem swerveDrive, TelemetrySubsystem telemetrySubsystem) {
     m_swerveDrive = swerveDrive;
-    m_pigeon = pigeon;
+    m_telemetrySubsystem = telemetrySubsystem;
 
     m_turnController = new PIDController(0.02, 0.0, 0.002);
     
@@ -40,7 +40,7 @@ public class SimpleAuto extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    startAngle = m_pigeon.getYaw();
+    startAngle = m_telemetrySubsystem.getPigeonYaw();
     m_turnController.setSetpoint(TARGET_ANGLE_DEGREES + startAngle);
     
   }
@@ -48,7 +48,7 @@ public class SimpleAuto extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double currentAngle = m_pigeon.getYaw();
+    double currentAngle = m_telemetrySubsystem.getPigeonYaw();
     double turnSpeed = m_turnController.calculate(currentAngle);
 
     m_swerveDrive.drive(new ChassisSpeeds(0, 0, -turnSpeed*TURN_SPEED), true);

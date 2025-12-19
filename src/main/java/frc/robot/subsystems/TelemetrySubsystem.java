@@ -40,6 +40,13 @@ public class TelemetrySubsystem extends SubsystemBase {
     return pose;
   }
 
+  public double getPigeonYaw(){
+    return m_pigeon.getYaw();
+  }
+
+  public boolean getLimelightTV(){
+    return m_limelightTwo.getTV();
+  } 
 
   @Override
   public void periodic() {
