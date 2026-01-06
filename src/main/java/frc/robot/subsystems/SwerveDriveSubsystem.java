@@ -64,10 +64,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   private double[] lastAngle = {0, 0, 0, 0};
   private double[] offset = {0, 0, 0, 0};
   private double[] targetTick = {0, 0, 0, 0};
+  private double[] motorSpeeds = {0, 0, 0, 0};
+  private double[] motorAngles = {0, 0, 0, 0};
 
   private double[] rotAngles = {45, -45, 135, -135};
 
-  private final SwerveDrivePoseEstimator m_poseEstimator;
   private Pigeon m_pigeon;
 
   public SwerveDriveSubsystem(Pigeon pigeon) {
@@ -109,12 +110,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     m_pigeon = pigeon;
-    m_poseEstimator = new SwerveDrivePoseEstimator(
-      SwerveDriveConstants.KINEMATICS,
-      Rotation2d.fromDegrees(m_pigeon.getYaw()),
-      getModulePositions(),
-      new Pose2d(0.0,0.0, Rotation2d.fromDegrees(0.0))
-    );
   }
 
   
@@ -159,7 +154,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         desiredPercentOutput = SwerveDriveConstants.MAXPERCENTOUTPUT * state.speedMetersPerSecond;
       }
       desiredPercentOutput *=-1;
-      
+      if(state.speedMetersPerSecond > 0.01){
+        motorSpeeds[i] = state.speedMetersPerSecond;
+      }
+      motorAngles[i] = state.angle.getDegrees();
+
       m_DriveMotor[i].set(desiredPercentOutput);
       double currentTick = getCurrentTick(currentAngle, i);
       targetTick[i] = currentTick;
@@ -205,5 +204,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Target Angle FR: ", lastAngle[1]);
     SmartDashboard.putNumber("Target Angle BL: ", lastAngle[2]);
     SmartDashboard.putNumber("Target Angle BR: ", lastAngle[3]);
+
+    SmartDashboard.putNumber("Velocity FL: ", motorSpeeds[0]);
+    SmartDashboard.putNumber("Velocity FR: ", motorSpeeds[1]);
+    SmartDashboard.putNumber("Velocity BL: ", motorSpeeds[2]);
+    SmartDashboard.putNumber("Velocity BR: ", motorSpeeds[3]);
+
+    SmartDashboard.putNumber("Angle FL: ", motorAngles[0]); 
+    SmartDashboard.putNumber("Angle FR: ", motorAngles[1]);
+    SmartDashboard.putNumber("Angle BL: ", motorAngles[2]);
+    SmartDashboard.putNumber("Angle BR: ", motorAngles[3]);
   }
 }

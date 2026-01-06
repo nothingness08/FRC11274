@@ -26,10 +26,10 @@ public final class AutosContainer {
 
     m_simpleAuto = new SimpleAuto(m_swerveDriveSubsystem, m_telemetrySubsystem);
     m_findAprilTagAuto = new FindAprilTagAuto(m_swerveDriveSubsystem, m_telemetrySubsystem);
-    m_moveToTargetF = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0, -0.8});
-    m_moveToTargetB = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0, -1.4});
-    m_moveToTargetL = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{-0.2, -1.1});
-    m_moveToTargetR = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0.2, -1.1});
+    m_moveToTargetF = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0, -0.7});
+    m_moveToTargetB = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0, -1.5});
+    m_moveToTargetL = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{-0.25, -1.1});
+    m_moveToTargetR = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0.25, -1.1});
 
     m_chooser.setDefaultOption("Simple Auto", m_simpleAuto);
     m_chooser.addOption("FindAprilTagAuto", m_findAprilTagAuto);
