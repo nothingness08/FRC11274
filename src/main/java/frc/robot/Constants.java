@@ -42,13 +42,13 @@ public final class Constants {
     public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(FRONT_LEFT_LOCATION, FRONT_RIGHT_LOCATION, BACK_LEFT_LOCATION, BACK_RIGHT_LOCATION);
 
     public static final double kF = 0.0;
-    public static final double kP = 0.4; //0.4
+    public static final double kP = 0.3; //0.4
     public static final double kI = 0.0; //0.0
     public static final double kD = 0.02; //0.01
 
     public static final int TICKS_PER_REVOLUTION = 4096;
 
-    public static final double MAXPERCENTOUTPUT = 0.2; 
+    public static final double MAXPERCENTOUTPUT = 0.15; 
     public static final double DRIVER_GEAR_RATIO = 6.86;
 
     public static final String CANbus = "rio";

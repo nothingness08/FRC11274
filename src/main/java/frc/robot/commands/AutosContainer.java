@@ -16,7 +16,7 @@ import frc.robot.subsystems.*;
 public final class AutosContainer {
   private final TelemetrySubsystem m_telemetrySubsystem;
   private final SwerveDriveSubsystem m_swerveDriveSubsystem;
-  public final Command m_simpleAuto, m_findAprilTagAuto, m_moveToTargetF, m_moveToTargetB, m_moveToTargetL, m_moveToTargetR;
+  public final Command m_simpleAuto, m_findAprilTagAuto, m_moveToTargetF, m_moveToTargetB, m_moveToTargetL, m_moveToTargetR, m_AlignToTag;
   
   SendableChooser<Command> m_chooser = new SendableChooser<>();
 
@@ -26,13 +26,16 @@ public final class AutosContainer {
 
     m_simpleAuto = new SimpleAuto(m_swerveDriveSubsystem, m_telemetrySubsystem);
     m_findAprilTagAuto = new FindAprilTagAuto(m_swerveDriveSubsystem, m_telemetrySubsystem);
-    m_moveToTargetF = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0, -0.7});
-    m_moveToTargetB = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0, -1.5});
-    m_moveToTargetL = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{-0.25, -1.1});
-    m_moveToTargetR = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0.25, -1.1});
+    m_moveToTargetF = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0, -1, 0});
+    m_moveToTargetB = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0, -1.5, 0});
+    m_moveToTargetL = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{-0.25, -1.1, 0});
+    m_moveToTargetR = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0.25, -1.1, 0});
+
+    m_AlignToTag = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0, -1.2, 0});
 
     m_chooser.setDefaultOption("Simple Auto", m_simpleAuto);
     m_chooser.addOption("FindAprilTagAuto", m_findAprilTagAuto);
+    m_chooser.addOption("Align Auto", m_AlignToTag);
     SmartDashboard.putData("Auto Mode",m_chooser);
   }
 

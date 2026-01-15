@@ -29,7 +29,7 @@ public class SimpleAuto extends Command {
     m_swerveDrive = swerveDrive;
     m_telemetrySubsystem = telemetrySubsystem;
 
-    m_turnController = new PIDController(0.02, 0.0, 0.002);
+    m_turnController = new PIDController(0.08, 0.0, 0.001);
     
     m_turnController.setTolerance(ANGLE_TOLERANCE_DEGREES);
 

@@ -12,7 +12,7 @@ import frc.robot.subsystems.*;
 /** An example command that uses an example subsystem. */
 public class MoveToTargetAuto extends Command {
   private final SwerveDriveSubsystem m_swerveDrive;
-  private final PIDController xController, yController;
+  private final PIDController xController, yController, rotController;
   private final TelemetrySubsystem m_telemetrySubsystem;
 
   
@@ -28,9 +28,9 @@ public class MoveToTargetAuto extends Command {
     m_swerveDrive = swerveDrive;
     this.targetPos = targetPos;
     m_telemetrySubsystem = telemetrySubsystem;
-    xController = new PIDController(1, 0, 0.01); 
-    yController = new PIDController(1, 0, 0.01);
-    // Use addRequirements() here to declare subsystem dependencies.
+    xController = new PIDController(0.02, 0, 0.001); 
+    yController = new PIDController(0.02, 0, 0.001);
+    rotController = new PIDController(1, 0, 0.01);
     addRequirements(m_swerveDrive);
   }
 
@@ -43,9 +43,16 @@ public class MoveToTargetAuto extends Command {
   @Override
   public void execute() {
     double currentPos[] = m_telemetrySubsystem.getPoseEstimateWithTag();
+    double currentYawInTagSpace = m_telemetrySubsystem.getBotPose_TargetSpace()[4];
     if(m_telemetrySubsystem.getLimelightTV()){
       double xSpeed = xController.calculate(currentPos[0], targetPos[0]);
-      double ySpeed = yController.calculate(currentPos[1], targetPos[1]); //make the end to within tolerance tomorrow
+      double ySpeed = yController.calculate(currentPos[1], targetPos[1]);
+      double rotSpeed = rotController.calculate(currentYawInTagSpace, targetPos[2]);
+      double mag = Math.sqrt(Math.pow(ySpeed, 2) + Math.pow(xSpeed, 2));
+      if(mag > 1.0){
+        xSpeed *= (1/(mag));
+        ySpeed *= (1/(mag));
+      }
       m_swerveDrive.drive(new ChassisSpeeds(xSpeed, ySpeed, 0), true);
     }
     else{
@@ -67,6 +74,6 @@ public class MoveToTargetAuto extends Command {
     }
     double currentPos[] = m_telemetrySubsystem.getPoseEstimateWithTag();
     double distance = Math.hypot(targetPos[0] - currentPos[0], targetPos[1] - currentPos[1]);
-    return distance < 0.05; // 10cm tolerance
+    return distance < 0.1;
   }
 }

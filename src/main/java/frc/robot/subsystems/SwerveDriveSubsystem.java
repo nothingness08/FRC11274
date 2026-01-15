@@ -5,12 +5,14 @@
 package frc.robot.subsystems;
 
 import java.io.PrintStream;
+import java.util.ConcurrentModificationException;
 
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -61,14 +63,23 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     m_backRightDriveMotor
   };
 
+  private PIDController[] driveControllers = {
+    new PIDController(0.02, 0.0, 0.002),
+    new PIDController(0.02, 0.0, 0.002),
+    new PIDController(0.02, 0.0, 0.002),
+    new PIDController(0.02, 0.0, 0.002),
+  };
+
   private double[] lastAngle = {0, 0, 0, 0};
   private double[] offset = {0, 0, 0, 0};
   private double[] targetTick = {0, 0, 0, 0};
-  private double[] motorSpeeds = {0, 0, 0, 0};
-  private double[] motorAngles = {0, 0, 0, 0};
 
+  private double[] percentOutputSign = {-1, -1, -1, -1};
+  
   private double[] rotAngles = {45, -45, 135, -135};
 
+
+  private double[][] rotAnglesComponents = {{ Math.sqrt(2)/2, Math.sqrt(2)/2}, {Math.sqrt(2)/2, -Math.sqrt(2)/2}, {-Math.sqrt(2)/2, Math.sqrt(2)/2}, {-Math.sqrt(2)/2, -Math.sqrt(2)/2}};
   private Pigeon m_pigeon;
 
   public SwerveDriveSubsystem(Pigeon pigeon) {
@@ -112,7 +123,44 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     m_pigeon = pigeon;
   }
 
+  private double findAngles(double[] velocities){
+    if(velocities[0] < 0){
+      if(velocities[1] < 0){
+        return Math.toDegrees(Math.atan(velocities[1]/velocities[0])) - 180;
+      } else{
+        return Math.toDegrees(Math.atan(velocities[1]/velocities[0])) + 180;
+      }
+    }
+    else{
+      return Math.toDegrees(Math.atan(velocities[1]/velocities[0]));
+    } 
+  }
+
+  private double[] offsetByAngle(double[] velocities, double angle){
+    if(velocities[0] == 0 && velocities[1]==0){
+      return new double[]{0,0};
+    }
+    double translationAngle = findAngles(velocities);
+    double offsetTranslationAngle = translationAngle - angle;
+    double vxOffset = Math.cos(Math.toRadians(offsetTranslationAngle)) * Math.sqrt(velocities[0] * velocities[0] + velocities[1] * velocities[1]);
+    double vyOffset = Math.sin(Math.toRadians(offsetTranslationAngle)) * Math.sqrt(velocities[0] * velocities[0] + velocities[1] * velocities[1]);
+    return new double[]{vxOffset, vyOffset};
+  }
   
+  private double[][] getVelocitiesAngles(ChassisSpeeds speeds){
+    double [][] velocitiesAngles = new double[4][2];
+    double[] velocitiesOffset = offsetByAngle(new double[]{speeds.vxMetersPerSecond, speeds.vyMetersPerSecond}, m_pigeon.getYaw());
+
+
+    for(int i = 0; i < 4; i++) {
+      double vx = speeds.omegaRadiansPerSecond * rotAnglesComponents[i][0] + velocitiesOffset[0];
+      double vy = speeds.omegaRadiansPerSecond * rotAnglesComponents[i][1] + velocitiesOffset[1];
+      velocitiesAngles[i][0] = Math.sqrt(vx * vx + vy * vy);
+      velocitiesAngles[i][1] = findAngles(new double[] {vx, vy});
+    }
+    return velocitiesAngles;
+  }
+
   private double thetaToTick(double theta) {
     return ((theta - 90) / 360.0) * SwerveDriveConstants.TICKS_PER_REVOLUTION;
   }
@@ -131,34 +179,31 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   }
 
   public void drive(ChassisSpeeds speeds, boolean fieldRelative) {
-    SwerveModuleState[] moduleStates = SwerveDriveConstants.KINEMATICS.toSwerveModuleStates(speeds);
-    //SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, SwerveDriveConstants.kMaxSpeedMetersPerSecond);
-    //SwerveDriveKinematics.normalizeWheelSpeeds(moduleStates, SwerveDrive.MAX_SPEED_METERS_PER_SECOND);
-
-    for(int i = 0; i < moduleStates.length; i++) {
-      SwerveModuleState state = moduleStates[i];
-      double currentAngle;
-      double desiredPercentOutput = 0;
-
-      if(speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond != 0){
-        currentAngle = rotAngles[i];
-        desiredPercentOutput = SwerveDriveConstants.MAXPERCENTOUTPUT * Math.signum(speeds.omegaRadiansPerSecond);
-      } else if(speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond == 0){
+    double [][] velocitiesAndAngles = getVelocitiesAngles(speeds);
+    
+    for(int i = 0; i < 4; i++) {
+      double desiredPercentOutput = SwerveDriveConstants.MAXPERCENTOUTPUT * velocitiesAndAngles[i][0];
+      double currentAngle = velocitiesAndAngles[i][1];
+      if(i==0){
+        System.out.println("last: " + lastAngle[i]);
+        System.out.println("current: " + currentAngle);
+      }
+      // if((Math.abs(lastAngle[i] - currentAngle)) > 90 && !Double.isNaN(currentAngle)){
+      //   percentOutputSign[i] *= -1;
+      //   if(currentAngle > 0){
+      //     currentAngle -=180;
+      //   }
+      //   else{
+      //     currentAngle +=180;
+      //   }
+      // }
+      if(speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond == 0){
         currentAngle = lastAngle[i];
       }
-      else{
-        currentAngle = state.angle.getDegrees();
-        if(fieldRelative){
-          currentAngle -= m_pigeon.getYaw();
-        }
-        desiredPercentOutput = SwerveDriveConstants.MAXPERCENTOUTPUT * state.speedMetersPerSecond;
+      desiredPercentOutput *= percentOutputSign[i];
+      if(i==0){
+        System.out.println(desiredPercentOutput);
       }
-      desiredPercentOutput *=-1;
-      if(state.speedMetersPerSecond > 0.01){
-        motorSpeeds[i] = state.speedMetersPerSecond;
-      }
-      motorAngles[i] = state.angle.getDegrees();
-
       m_DriveMotor[i].set(desiredPercentOutput);
       double currentTick = getCurrentTick(currentAngle, i);
       targetTick[i] = currentTick;
@@ -189,30 +234,20 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
 
-    SmartDashboard.putNumber("Actual Tick FL: ", m_AngleMotor[0].getSelectedSensorPosition());
-    SmartDashboard.putNumber("Actual Tick FR: ", m_AngleMotor[1].getSelectedSensorPosition());
-    SmartDashboard.putNumber("Actual Tick BL: ", m_AngleMotor[2].getSelectedSensorPosition());
-    SmartDashboard.putNumber("Actual Tick BR: ", m_AngleMotor[3].getSelectedSensorPosition());
+    // SmartDashboard.putNumber("Actual Tick FL: ", m_AngleMotor[0].getSelectedSensorPosition());
+    // SmartDashboard.putNumber("Actual Tick FR: ", m_AngleMotor[1].getSelectedSensorPosition());
+    // SmartDashboard.putNumber("Actual Tick BL: ", m_AngleMotor[2].getSelectedSensorPosition());
+    // SmartDashboard.putNumber("Actual Tick BR: ", m_AngleMotor[3].getSelectedSensorPosition());
 
-    double[] deltas = getDeltaTarget();
-    SmartDashboard.putNumber("Delta Tick FL: ", deltas[0]);
-    SmartDashboard.putNumber("Delta Tick FR: ", deltas[1]);
-    SmartDashboard.putNumber("Delta Tick BL: ", deltas[2]);
-    SmartDashboard.putNumber("Delta Tick BR: ", deltas[3]);
+    // double[] deltas = getDeltaTarget();
+    // SmartDashboard.putNumber("Delta Tick FL: ", deltas[0]);
+    // SmartDashboard.putNumber("Delta Tick FR: ", deltas[1]);
+    // SmartDashboard.putNumber("Delta Tick BL: ", deltas[2]);
+    // SmartDashboard.putNumber("Delta Tick BR: ", deltas[3]);
 
-    SmartDashboard.putNumber("Target Angle FL: ", lastAngle[0]);
-    SmartDashboard.putNumber("Target Angle FR: ", lastAngle[1]);
-    SmartDashboard.putNumber("Target Angle BL: ", lastAngle[2]);
-    SmartDashboard.putNumber("Target Angle BR: ", lastAngle[3]);
-
-    SmartDashboard.putNumber("Velocity FL: ", motorSpeeds[0]);
-    SmartDashboard.putNumber("Velocity FR: ", motorSpeeds[1]);
-    SmartDashboard.putNumber("Velocity BL: ", motorSpeeds[2]);
-    SmartDashboard.putNumber("Velocity BR: ", motorSpeeds[3]);
-
-    SmartDashboard.putNumber("Angle FL: ", motorAngles[0]); 
-    SmartDashboard.putNumber("Angle FR: ", motorAngles[1]);
-    SmartDashboard.putNumber("Angle BL: ", motorAngles[2]);
-    SmartDashboard.putNumber("Angle BR: ", motorAngles[3]);
+    // SmartDashboard.putNumber("Target Angle FL: ", lastAngle[0]);
+    // SmartDashboard.putNumber("Target Angle FR: ", lastAngle[1]);
+    // SmartDashboard.putNumber("Target Angle BL: ", lastAngle[2]);
+    // SmartDashboard.putNumber("Target Angle BR: ", lastAngle[3]);
   }
 }

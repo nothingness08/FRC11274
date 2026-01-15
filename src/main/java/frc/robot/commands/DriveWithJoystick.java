@@ -42,12 +42,11 @@ public class DriveWithJoystick extends Command {
       ySpeed = 0.0;
     }
     rot = Math.abs(rot) > OIConstants.CONTROLLER_DEADBAND ? rot : 0.0;
-
-    // Use field-centric control (robot relative would use ChassisSpeeds.fromFieldRelativeSpeeds)
+    xSpeed *= (1/(mag));
+    ySpeed *= (1/(mag));
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, rot);
 
-    // Pass the speeds to the subsystem's drive method
-    m_swerveDrive.drive(chassisSpeeds, true);
+    m_swerveDrive.drive(chassisSpeeds, false);
   }
 
   // Called once the command ends or is interrupted.

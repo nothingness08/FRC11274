@@ -48,6 +48,10 @@ public class TelemetrySubsystem extends SubsystemBase {
     return m_limelightTwo.getTV();
   } 
 
+  public double[] getBotPose_TargetSpace(){
+    return LimelightHelpers.getBotPose_TargetSpace(m_limelightTwo.getLimelightName());
+  }
+
   @Override
   public void periodic() {
     m_poseEstimator.update(
@@ -80,5 +84,13 @@ public class TelemetrySubsystem extends SubsystemBase {
 
     SmartDashboard.putNumber("Estimated X in", poseEstimate[0]*39.37);
     SmartDashboard.putNumber("Estimated Y in", poseEstimate[1]*39.37);
+
+    // double botPoseInTargetSpace[] = getBotPose_TargetSpace();
+    // if (botPoseInTargetSpace != null || botPoseInTargetSpace.length != 0) {
+    //   SmartDashboard.putNumber("Target Space X (m)", botPoseInTargetSpace[0]);
+    //   SmartDashboard.putNumber("Target Space Y (m)", botPoseInTargetSpace[1]);
+    //   SmartDashboard.putNumber("Target Space Z (m)", botPoseInTargetSpace[2]);
+    //   SmartDashboard.putNumber("Target Space Yaw (deg)", botPoseInTargetSpace[4]);
+    // }
   }
 }
