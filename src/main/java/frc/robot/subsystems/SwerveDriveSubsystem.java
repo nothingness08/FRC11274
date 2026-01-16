@@ -183,29 +183,34 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     
     for(int i = 0; i < 4; i++) {
       double desiredPercentOutput = SwerveDriveConstants.MAXPERCENTOUTPUT * velocitiesAndAngles[i][0];
-      double currentAngle = velocitiesAndAngles[i][1];
-      if(i==0){
-        System.out.println("last: " + lastAngle[i]);
-        System.out.println("current: " + currentAngle);
-      }
-      // if((Math.abs(lastAngle[i] - currentAngle)) > 90 && !Double.isNaN(currentAngle)){
-      //   percentOutputSign[i] *= -1;
-      //   if(currentAngle > 0){
-      //     currentAngle -=180;
-      //   }
-      //   else{
-      //     currentAngle +=180;
-      //   }
+      double currentAngle, modifiedCurrentAngle;
+      // if(i==0){
+      //   System.out.println("last: " + lastAngle[i]);
+      //   System.out.println("current: " + currentAngle);
       // }
       if(speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond == 0){
         currentAngle = lastAngle[i];
       }
+      else{
+        currentAngle = velocitiesAndAngles[i][1];
+      }
+      modifiedCurrentAngle = currentAngle;
+      if((Math.abs(lastAngle[i] - currentAngle)) > 90 && !Double.isNaN(currentAngle)){
+        percentOutputSign[i] *= -1;
+        if(currentAngle > 0){
+          modifiedCurrentAngle -=180;
+        }
+        else{
+          modifiedCurrentAngle +=180;
+        }
+      }
+      
       desiredPercentOutput *= percentOutputSign[i];
       if(i==0){
         System.out.println(desiredPercentOutput);
       }
       m_DriveMotor[i].set(desiredPercentOutput);
-      double currentTick = getCurrentTick(currentAngle, i);
+      double currentTick = getCurrentTick(modifiedCurrentAngle, i);
       targetTick[i] = currentTick;
       lastAngle[i] = currentAngle;
       m_AngleMotor[i].set(TalonSRXControlMode.Position, currentTick);
