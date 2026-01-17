@@ -63,21 +63,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     m_backRightDriveMotor
   };
 
-  private PIDController[] driveControllers = {
-    new PIDController(0.02, 0.0, 0.002),
-    new PIDController(0.02, 0.0, 0.002),
-    new PIDController(0.02, 0.0, 0.002),
-    new PIDController(0.02, 0.0, 0.002),
-  };
-
   private double[] lastAngle = {0, 0, 0, 0};
   private double[] offset = {0, 0, 0, 0};
   private double[] targetTick = {0, 0, 0, 0};
 
-  private double[] percentOutputSign = {-1, -1, -1, -1};
-  
-  private double[] rotAngles = {45, -45, 135, -135};
-
+  private boolean[] motorFlipped = {false, false, false, false};
 
   private double[][] rotAnglesComponents = {{ Math.sqrt(2)/2, Math.sqrt(2)/2}, {Math.sqrt(2)/2, -Math.sqrt(2)/2}, {-Math.sqrt(2)/2, Math.sqrt(2)/2}, {-Math.sqrt(2)/2, -Math.sqrt(2)/2}};
   private Pigeon m_pigeon;
@@ -123,6 +113,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     m_pigeon = pigeon;
   }
 
+  private double distanceBetweenAngles(double a1, double a2){
+    return Math.abs((Math.abs(a1 - a2 + 180) % 360) - 180);
+  }
   private double findAngles(double[] velocities){
     if(velocities[0] < 0){
       if(velocities[1] < 0){
@@ -183,34 +176,34 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     
     for(int i = 0; i < 4; i++) {
       double desiredPercentOutput = SwerveDriveConstants.MAXPERCENTOUTPUT * velocitiesAndAngles[i][0];
-      double currentAngle, modifiedCurrentAngle;
+      double currentAngle, flippedAngle, targetAngle;
       // if(i==0){
       //   System.out.println("last: " + lastAngle[i]);
       //   System.out.println("current: " + currentAngle);
       // }
       if(speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond == 0){
         currentAngle = lastAngle[i];
-      }
+      }  
       else{
         currentAngle = velocitiesAndAngles[i][1];
       }
-      modifiedCurrentAngle = currentAngle;
-      if((Math.abs(lastAngle[i] - currentAngle)) > 90 && !Double.isNaN(currentAngle)){
-        percentOutputSign[i] *= -1;
-        if(currentAngle > 0){
-          modifiedCurrentAngle -=180;
-        }
-        else{
-          modifiedCurrentAngle +=180;
-        }
+      flippedAngle = (currentAngle > 180) ? (currentAngle - 180) : (currentAngle + 180);
+      if(distanceBetweenAngles(lastAngle[i], flippedAngle) < distanceBetweenAngles(lastAngle[i], currentAngle)){
+        motorFlipped[i] = true;
+        targetAngle = flippedAngle;
       }
-      
-      desiredPercentOutput *= percentOutputSign[i];
+      else{
+        motorFlipped[i] = false;
+        targetAngle = currentAngle;
+      }
+      if(!motorFlipped[i]){
+        desiredPercentOutput *= -1;
+      }
       if(i==0){
         System.out.println(desiredPercentOutput);
       }
       m_DriveMotor[i].set(desiredPercentOutput);
-      double currentTick = getCurrentTick(modifiedCurrentAngle, i);
+      double currentTick = getCurrentTick(targetAngle, i);
       targetTick[i] = currentTick;
       lastAngle[i] = currentAngle;
       m_AngleMotor[i].set(TalonSRXControlMode.Position, currentTick);
