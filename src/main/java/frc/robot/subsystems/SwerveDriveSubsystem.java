@@ -4,45 +4,26 @@
 
 package frc.robot.subsystems;
 
-import java.io.PrintStream;
-import java.util.ConcurrentModificationException;
-
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.AprilTagConstants;
-import frc.robot.Constants.SwerveDriveConstants;
-import frc.robot.libs.LimelightHelpers;
-
-
-import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.hardware.core.CoreTalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import frc.robot.subsystems.Pigeon;
-import frc.robot.subsystems.LimelightSubsystem;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.SwerveDriveConstants;
 
 public class SwerveDriveSubsystem extends SubsystemBase {
 
   //put this into array later for all 4 modules
-  private final WPI_TalonSRX m_frontLeftAngleMotor = new WPI_TalonSRX(SwerveDriveConstants.FRONT_LEFT_ANGLE_MOTOR_ID);
-  private final WPI_TalonSRX m_frontRightAngleMotor = new WPI_TalonSRX(SwerveDriveConstants.FRONT_RIGHT_ANGLE_MOTOR_ID);
-  private final WPI_TalonSRX m_backLeftAngleMotor = new WPI_TalonSRX(SwerveDriveConstants.BACK_LEFT_ANGLE_MOTOR_ID);
-  private final WPI_TalonSRX m_backRightAngleMotor = new WPI_TalonSRX(SwerveDriveConstants.BACK_RIGHT_ANGLE_MOTOR_ID);
+  private final WPI_TalonSRX m_frontLeftAngleMotor = new WPI_TalonSRX(SwerveDriveConstants.AngleMotors.FRONT_LEFT_ID);
+  private final WPI_TalonSRX m_frontRightAngleMotor = new WPI_TalonSRX(SwerveDriveConstants.AngleMotors.FRONT_RIGHT_ID);
+  private final WPI_TalonSRX m_backLeftAngleMotor = new WPI_TalonSRX(SwerveDriveConstants.AngleMotors.BACK_LEFT_ID);
+  private final WPI_TalonSRX m_backRightAngleMotor = new WPI_TalonSRX(SwerveDriveConstants.AngleMotors.BACK_RIGHT_ID);
 
   private final WPI_TalonSRX[]  m_AngleMotor= {
     m_frontLeftAngleMotor,
@@ -51,10 +32,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     m_backRightAngleMotor
   };
 
-  private final TalonFX m_frontLeftDriveMotor = new TalonFX(SwerveDriveConstants.FRONT_LEFT_DRIVE_MOTOR_ID, SwerveDriveConstants.CANbus);
-  private final TalonFX m_frontRightDriveMotor = new TalonFX(SwerveDriveConstants.FRONT_RIGHT_DRIVE_MOTOR_ID, SwerveDriveConstants.CANbus);
-  private final TalonFX m_backLeftDriveMotor = new TalonFX(SwerveDriveConstants.BACK_LEFT_DRIVE_MOTOR_ID, SwerveDriveConstants.CANbus);
-  private final TalonFX m_backRightDriveMotor = new TalonFX(SwerveDriveConstants.BACK_RIGHT_DRIVE_MOTOR_ID, SwerveDriveConstants.CANbus);
+  private final TalonFX m_frontLeftDriveMotor = new TalonFX(SwerveDriveConstants.DriveMotors.FRONT_LEFT_ID, SwerveDriveConstants.CANbus);
+  private final TalonFX m_frontRightDriveMotor = new TalonFX(SwerveDriveConstants.DriveMotors.FRONT_RIGHT_ID, SwerveDriveConstants.CANbus);
+  private final TalonFX m_backLeftDriveMotor = new TalonFX(SwerveDriveConstants.DriveMotors.BACK_LEFT_ID, SwerveDriveConstants.CANbus);
+  private final TalonFX m_backRightDriveMotor = new TalonFX(SwerveDriveConstants.DriveMotors.BACK_RIGHT_ID, SwerveDriveConstants.CANbus);
 
   private final TalonFX[]  m_DriveMotor= {
     m_frontLeftDriveMotor,
@@ -68,7 +49,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   private double[] targetTick = {0, 0, 0, 0};
 
   private boolean[] motorFlipped = {false, false, false, false};
-
+  private double wheelRadius = SwerveDriveConstants.robotWidth / Math.sqrt(2);
   private double[][] rotAnglesComponents = {{ Math.sqrt(2)/2, Math.sqrt(2)/2}, {Math.sqrt(2)/2, -Math.sqrt(2)/2}, {-Math.sqrt(2)/2, Math.sqrt(2)/2}, {-Math.sqrt(2)/2, -Math.sqrt(2)/2}};
   private Pigeon m_pigeon;
 
@@ -88,20 +69,20 @@ public class SwerveDriveSubsystem extends SubsystemBase {
       angleMotor.configPeakOutputReverse(-1, 10);
       angleMotor.configAllowableClosedloopError(0, 0, 10);
 
-      angleMotor.config_kF(0, SwerveDriveConstants.kF, 10);
-      angleMotor.config_kP(0, SwerveDriveConstants.kP, 10);
-      angleMotor.config_kI(0, SwerveDriveConstants.kI, 10);
-      angleMotor.config_kD(0, SwerveDriveConstants.kD, 10);
+      angleMotor.config_kF(0, SwerveDriveConstants.AngleMotors.kF, 10);
+      angleMotor.config_kP(0, SwerveDriveConstants.AngleMotors.kP, 10);
+      angleMotor.config_kI(0, SwerveDriveConstants.AngleMotors.kI, 10);
+      angleMotor.config_kD(0, SwerveDriveConstants.AngleMotors.kD, 10);
 
-      angleMotor.setSelectedSensorPosition(0, 0, 10);
+      angleMotor.setSelectedSensorPosition(0, 0, 10); //try deleting this sometime, might make it absolute?
     }
 
     for(TalonFX driveMotor : m_DriveMotor) {
       TalonFXConfiguration configs = new TalonFXConfiguration();
 
-      configs.Slot0.kP = SwerveDriveConstants.kP;
-      configs.Slot0.kI = SwerveDriveConstants.kI;
-      configs.Slot0.kD = SwerveDriveConstants.kD;
+      configs.Slot0.kP = SwerveDriveConstants.DriveMotors.kP;
+      configs.Slot0.kI = SwerveDriveConstants.DriveMotors.kI;
+      configs.Slot0.kD = SwerveDriveConstants.DriveMotors.kD;
       configs.Slot0.kV = 2;
       
       configs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -146,8 +127,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
 
     for(int i = 0; i < 4; i++) {
-      double vx = speeds.omegaRadiansPerSecond * rotAnglesComponents[i][0] + velocitiesOffset[0];
-      double vy = speeds.omegaRadiansPerSecond * rotAnglesComponents[i][1] + velocitiesOffset[1];
+      double vx = speeds.omegaRadiansPerSecond * wheelRadius * rotAnglesComponents[i][0] + velocitiesOffset[0];
+      double vy = speeds.omegaRadiansPerSecond * wheelRadius * rotAnglesComponents[i][1] + velocitiesOffset[1];
       velocitiesAngles[i][0] = Math.sqrt(vx * vx + vy * vy);
       velocitiesAngles[i][1] = findAngles(new double[] {vx, vy});
     }
@@ -187,7 +168,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
       else{
         currentAngle = velocitiesAndAngles[i][1];
       }
-      flippedAngle = (currentAngle > 180) ? (currentAngle - 180) : (currentAngle + 180);
+      flippedAngle = (currentAngle > 0) ? (currentAngle - 180) : (currentAngle + 180);
       if(distanceBetweenAngles(lastAngle[i], flippedAngle) < distanceBetweenAngles(lastAngle[i], currentAngle)){
         motorFlipped[i] = true;
         targetAngle = flippedAngle;
@@ -205,7 +186,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
       m_DriveMotor[i].set(desiredPercentOutput);
       double currentTick = getCurrentTick(targetAngle, i);
       targetTick[i] = currentTick;
-      lastAngle[i] = currentAngle;
+      lastAngle[i] = targetAngle;
       m_AngleMotor[i].set(TalonSRXControlMode.Position, currentTick);
     }
   }
