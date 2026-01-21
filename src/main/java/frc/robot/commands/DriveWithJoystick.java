@@ -8,6 +8,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.SwerveDriveSubsystem;
 
@@ -41,12 +42,12 @@ public class DriveWithJoystick extends Command {
       xSpeed = 0.0;
       ySpeed = 0.0;
     }
-    rot = Math.abs(rot) > OIConstants.CONTROLLER_DEADBAND ? rot : 0.0;
+    rot = Math.abs(rot) > OIConstants.CONTROLLER_DEADBAND ? (rot*Constants.SwerveDriveConstants.ROTATEJOYSTICKSCALE) : 0.0;
     xSpeed *= (1/(mag));
     ySpeed *= (1/(mag));
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, rot);
 
-    m_swerveDrive.drive(chassisSpeeds, false);
+    m_swerveDrive.drive(chassisSpeeds, true);
   }
 
   // Called once the command ends or is interrupted.

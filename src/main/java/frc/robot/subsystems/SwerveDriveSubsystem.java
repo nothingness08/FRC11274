@@ -14,6 +14,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveDriveConstants;
 
@@ -121,9 +122,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     return new double[]{vxOffset, vyOffset};
   }
   
-  private double[][] getVelocitiesAngles(ChassisSpeeds speeds){
+  private double[][] getVelocitiesAngles(ChassisSpeeds speeds, boolean fieldRelative){
     double [][] velocitiesAngles = new double[4][2];
-    double[] velocitiesOffset = offsetByAngle(new double[]{speeds.vxMetersPerSecond, speeds.vyMetersPerSecond}, m_pigeon.getYaw());
+    double[] velocitiesOffset;
+    if(fieldRelative){
+      velocitiesOffset = offsetByAngle(new double[]{speeds.vxMetersPerSecond, speeds.vyMetersPerSecond}, m_pigeon.getYaw());
+    }
+    else{
+      velocitiesOffset = new double[]{speeds.vxMetersPerSecond, speeds.vyMetersPerSecond};
+    }
 
 
     for(int i = 0; i < 4; i++) {
@@ -153,15 +160,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   }
 
   public void drive(ChassisSpeeds speeds, boolean fieldRelative) {
-    double [][] velocitiesAndAngles = getVelocitiesAngles(speeds);
+    double [][] velocitiesAndAngles = getVelocitiesAngles(speeds, fieldRelative);
     
     for(int i = 0; i < 4; i++) {
       double desiredPercentOutput = SwerveDriveConstants.MAXPERCENTOUTPUT * velocitiesAndAngles[i][0];
       double currentAngle, flippedAngle, targetAngle;
-      // if(i==0){
-      //   System.out.println("last: " + lastAngle[i]);
-      //   System.out.println("current: " + currentAngle);
-      // }
       if(speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond == 0){
         currentAngle = lastAngle[i];
       }  
@@ -179,9 +182,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
       }
       if(!motorFlipped[i]){
         desiredPercentOutput *= -1;
-      }
-      if(i==0){
-        System.out.println(desiredPercentOutput);
       }
       m_DriveMotor[i].set(desiredPercentOutput);
       double currentTick = getCurrentTick(targetAngle, i);
@@ -213,20 +213,20 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
 
-    // SmartDashboard.putNumber("Actual Tick FL: ", m_AngleMotor[0].getSelectedSensorPosition());
-    // SmartDashboard.putNumber("Actual Tick FR: ", m_AngleMotor[1].getSelectedSensorPosition());
-    // SmartDashboard.putNumber("Actual Tick BL: ", m_AngleMotor[2].getSelectedSensorPosition());
-    // SmartDashboard.putNumber("Actual Tick BR: ", m_AngleMotor[3].getSelectedSensorPosition());
+    SmartDashboard.putNumber("Actual Tick FL: ", m_AngleMotor[0].getSelectedSensorPosition());
+    SmartDashboard.putNumber("Actual Tick FR: ", m_AngleMotor[1].getSelectedSensorPosition());
+    SmartDashboard.putNumber("Actual Tick BL: ", m_AngleMotor[2].getSelectedSensorPosition());
+    SmartDashboard.putNumber("Actual Tick BR: ", m_AngleMotor[3].getSelectedSensorPosition());
 
-    // double[] deltas = getDeltaTarget();
-    // SmartDashboard.putNumber("Delta Tick FL: ", deltas[0]);
-    // SmartDashboard.putNumber("Delta Tick FR: ", deltas[1]);
-    // SmartDashboard.putNumber("Delta Tick BL: ", deltas[2]);
-    // SmartDashboard.putNumber("Delta Tick BR: ", deltas[3]);
+    double[] deltas = getDeltaTarget();
+    SmartDashboard.putNumber("Delta Tick FL: ", deltas[0]);
+    SmartDashboard.putNumber("Delta Tick FR: ", deltas[1]);
+    SmartDashboard.putNumber("Delta Tick BL: ", deltas[2]);
+    SmartDashboard.putNumber("Delta Tick BR: ", deltas[3]);
 
-    // SmartDashboard.putNumber("Target Angle FL: ", lastAngle[0]);
-    // SmartDashboard.putNumber("Target Angle FR: ", lastAngle[1]);
-    // SmartDashboard.putNumber("Target Angle BL: ", lastAngle[2]);
-    // SmartDashboard.putNumber("Target Angle BR: ", lastAngle[3]);
+    SmartDashboard.putNumber("Target Angle FL: ", lastAngle[0]);
+    SmartDashboard.putNumber("Target Angle FR: ", lastAngle[1]);
+    SmartDashboard.putNumber("Target Angle BL: ", lastAngle[2]);
+    SmartDashboard.putNumber("Target Angle BR: ", lastAngle[3]);
   }
 }

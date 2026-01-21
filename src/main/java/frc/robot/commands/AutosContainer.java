@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,12 +28,12 @@ public final class AutosContainer {
 
     m_simpleAuto = new SimpleAuto(m_swerveDriveSubsystem, m_telemetrySubsystem);
     m_findAprilTagAuto = new FindAprilTagAuto(m_swerveDriveSubsystem, m_telemetrySubsystem);
-    m_moveToTargetF = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0, -1, 0});
-    m_moveToTargetB = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0, -1.5, 0});
-    m_moveToTargetL = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{-0.25, -1.1, 0});
-    m_moveToTargetR = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0.25, -1.1, 0});
+    m_moveToTargetF = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(4, 11, Rotation2d.fromDegrees(0)));
+    m_moveToTargetB = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(4, 11, Rotation2d.fromDegrees(0)));
+    m_moveToTargetL = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(4, 11, Rotation2d.fromDegrees(0)));
+    m_moveToTargetR = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(4, 11, Rotation2d.fromDegrees(0)));
 
-    m_AlignToTag = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new double[]{0, -1.2, 0});
+    m_AlignToTag = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(4.2, 11, Rotation2d.fromDegrees(0)));
 
     m_chooser.setDefaultOption("Simple Auto", m_simpleAuto);
     m_chooser.addOption("FindAprilTagAuto", m_findAprilTagAuto);

@@ -32,11 +32,12 @@ public class TelemetrySubsystem extends SubsystemBase {
     );
   }
 
-  public double[] getPoseEstimateWithTag(){
-    double[] pose = new double[3];
-    pose[0] = -(m_poseEstimator.getEstimatedPosition().getY() - AprilTagConstants.TAG_Y);
-    pose[1] = m_poseEstimator.getEstimatedPosition().getX() - AprilTagConstants.TAG_X;
-    pose[2] = m_poseEstimator.getEstimatedPosition().getRotation().getDegrees();
+  public Pose2d getPoseEstimate(){
+    Pose2d pose = new Pose2d(
+      m_poseEstimator.getEstimatedPosition().getY(),
+      m_poseEstimator.getEstimatedPosition().getX(),
+      m_poseEstimator.getEstimatedPosition().getRotation()
+    );
     return pose;
   }
 
@@ -78,12 +79,13 @@ public class TelemetrySubsystem extends SubsystemBase {
       m_poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
     }
 
-    double poseEstimate[] = getPoseEstimateWithTag();
-    SmartDashboard.putNumber("Estimated X", poseEstimate[0]);
-    SmartDashboard.putNumber("Estimated Y", poseEstimate[1]);
+    Pose2d poseEstimate = getPoseEstimate();
+    SmartDashboard.putNumber("Estimated X", poseEstimate.getX());
+    SmartDashboard.putNumber("Estimated Y", poseEstimate.getY());
+    SmartDashboard.putNumber("Estimated Rotation", poseEstimate.getRotation().getDegrees());
 
-    SmartDashboard.putNumber("Estimated X in", poseEstimate[0]*39.37);
-    SmartDashboard.putNumber("Estimated Y in", poseEstimate[1]*39.37);
+    SmartDashboard.putNumber("Estimated X in", poseEstimate.getX()*39.37);
+    SmartDashboard.putNumber("Estimated Y in", poseEstimate.getY()*39.37);
 
     // double botPoseInTargetSpace[] = getBotPose_TargetSpace();
     // if (botPoseInTargetSpace != null || botPoseInTargetSpace.length != 0) {
