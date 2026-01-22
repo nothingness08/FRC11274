@@ -21,9 +21,9 @@ public class MoveToTargetAuto extends Command {
 
   private final HolonomicDriveController holonomicController = 
     new HolonomicDriveController(
-      new PIDController(0.9, 0, 0.01),
-      new PIDController(0.9, 0, 0.01),
-      new ProfiledPIDController(1.5, 0, 0, 
+      new PIDController(1.1, 0, 0.005),
+      new PIDController(1.1, 0, 0.005),
+      new ProfiledPIDController(1.5, 0.01, 0.01, 
         new TrapezoidProfile.Constraints(6.28, 3.14)
       )
     );
@@ -39,7 +39,7 @@ public class MoveToTargetAuto extends Command {
     m_swerveDrive = swerveDrive;
     this.targetPos = targetPos;
     m_telemetrySubsystem = telemetrySubsystem;
-    holonomicController.setTolerance(new Pose2d(0.06, 0.06, Rotation2d.fromDegrees(4)));
+    holonomicController.setTolerance(new Pose2d(0.05, 0.05, Rotation2d.fromDegrees(4)));
     addRequirements(m_swerveDrive);
   }
 
@@ -51,7 +51,7 @@ public class MoveToTargetAuto extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    Pose2d currentPose = m_telemetrySubsystem.getPoseEstimate();
+    Pose2d currentPose = m_telemetrySubsystem.getPose();
     if(m_telemetrySubsystem.getLimelightTV()){
       ChassisSpeeds newSpeeds = holonomicController.calculate(currentPose, targetPos, 0, targetPos.getRotation());
       ChassisSpeeds newSpeedsFixed = new ChassisSpeeds(-newSpeeds.vxMetersPerSecond, newSpeeds.vyMetersPerSecond, -newSpeeds.omegaRadiansPerSecond);
@@ -71,9 +71,9 @@ public class MoveToTargetAuto extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    // if(!m_telemetrySubsystem.getLimelightTV()){
-    //   return true;
-    // }
+    if(!m_telemetrySubsystem.getLimelightTV()){
+      return true;
+    }
     return holonomicController.atReference();
   }
 }

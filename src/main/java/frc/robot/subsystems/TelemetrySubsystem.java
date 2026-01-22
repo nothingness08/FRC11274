@@ -32,7 +32,7 @@ public class TelemetrySubsystem extends SubsystemBase {
     );
   }
 
-  public Pose2d getPoseEstimate(){
+  public Pose2d getPose(){
     Pose2d pose = new Pose2d(
       m_poseEstimator.getEstimatedPosition().getY(),
       m_poseEstimator.getEstimatedPosition().getX(),
@@ -51,6 +51,14 @@ public class TelemetrySubsystem extends SubsystemBase {
 
   public double[] getBotPose_TargetSpace(){
     return LimelightHelpers.getBotPose_TargetSpace(m_limelightTwo.getLimelightName());
+  }
+
+  public void resetPose(Pose2d newPose){
+    m_poseEstimator.resetPosition(
+      Rotation2d.fromDegrees(m_pigeon.getYaw()),
+      m_swerveDriveSubsystem.getModulePositions(),
+      newPose
+    );
   }
 
   @Override
@@ -79,20 +87,12 @@ public class TelemetrySubsystem extends SubsystemBase {
       m_poseEstimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
     }
 
-    Pose2d poseEstimate = getPoseEstimate();
+    Pose2d poseEstimate = getPose();
     SmartDashboard.putNumber("Estimated X", poseEstimate.getX());
     SmartDashboard.putNumber("Estimated Y", poseEstimate.getY());
     SmartDashboard.putNumber("Estimated Rotation", poseEstimate.getRotation().getDegrees());
 
     SmartDashboard.putNumber("Estimated X in", poseEstimate.getX()*39.37);
     SmartDashboard.putNumber("Estimated Y in", poseEstimate.getY()*39.37);
-
-    // double botPoseInTargetSpace[] = getBotPose_TargetSpace();
-    // if (botPoseInTargetSpace != null || botPoseInTargetSpace.length != 0) {
-    //   SmartDashboard.putNumber("Target Space X (m)", botPoseInTargetSpace[0]);
-    //   SmartDashboard.putNumber("Target Space Y (m)", botPoseInTargetSpace[1]);
-    //   SmartDashboard.putNumber("Target Space Z (m)", botPoseInTargetSpace[2]);
-    //   SmartDashboard.putNumber("Target Space Yaw (deg)", botPoseInTargetSpace[4]);
-    // }
   }
 }

@@ -35,7 +35,7 @@ public final class Constants {
 
     public static final int TICKS_PER_REVOLUTION = 4096;
 
-    public static final double MAXPERCENTOUTPUT = 0.2;
+    public static final double MAXPERCENTOUTPUT = 0.15;
     public static final double ROTATEJOYSTICKSCALE = 1.5;
     public static final double DRIVER_GEAR_RATIO = 6.86;
 

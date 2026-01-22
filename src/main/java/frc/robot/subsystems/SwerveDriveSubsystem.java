@@ -11,6 +11,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -48,6 +49,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   private double[] lastAngle = {0, 0, 0, 0};
   private double[] offset = {0, 0, 0, 0};
   private double[] targetTick = {0, 0, 0, 0};
+
+  private double lastRotation = 0;
+  private PIDController rotationController = new PIDController(0.1, 0, 0);
 
   private boolean[] motorFlipped = {false, false, false, false};
   private double wheelRadius = SwerveDriveConstants.robotWidth / Math.sqrt(2);
@@ -160,7 +164,18 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   }
 
   public void drive(ChassisSpeeds speeds, boolean fieldRelative) {
-    double [][] velocitiesAndAngles = getVelocitiesAngles(speeds, fieldRelative);
+    // double newRotationVelocity;
+    // ChassisSpeeds newSpeeds;
+    // if(speeds.omegaRadiansPerSecond != 0){
+    //   lastRotation = m_pigeon.getYaw();
+    //   newRotationVelocity = speeds.omegaRadiansPerSecond;
+    // }
+    // else{
+    //   newRotationVelocity = (-1* rotationController.calculate(m_pigeon.getYaw(), lastRotation));
+    // }
+    // newSpeeds = new ChassisSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, newRotationVelocity);
+
+    double [][] velocitiesAndAngles = getVelocitiesAngles(ChassisSpeeds.discretize(speeds, 0.02), fieldRelative);
     
     for(int i = 0; i < 4; i++) {
       double desiredPercentOutput = SwerveDriveConstants.MAXPERCENTOUTPUT * velocitiesAndAngles[i][0];
