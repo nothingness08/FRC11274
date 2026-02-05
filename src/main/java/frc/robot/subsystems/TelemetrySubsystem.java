@@ -37,33 +37,6 @@ public class TelemetrySubsystem extends SubsystemBase {
       new Pose2d(0.0,0.0, Rotation2d.fromDegrees(0.0))
     );
 
-    RobotConfig config;
-    try {
-      config = RobotConfig.fromGUISettings();
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw new RuntimeException("Failed to load PathPlanner RobotConfig");
-    }
-
-    AutoBuilder.configure(
-      this::getPose,
-      this::resetPose,
-      m_swerveDriveSubsystem::getRobotRelativeSpeeds,
-      (speeds, feedforwards) -> m_swerveDriveSubsystem.drive(speeds, false), 
-      new PPHolonomicDriveController(
-        new PIDConstants(5.0, 0.0, 0.0), 
-        new PIDConstants(5.0, 0.0, 0.0) 
-      ),
-      config,
-      () -> {
-        var alliance = DriverStation.getAlliance();
-        if (alliance.isPresent()) {
-          return alliance.get() == DriverStation.Alliance.Red;
-        }
-        return false;
-      },
-      m_swerveDriveSubsystem 
-    );
 
   }
 

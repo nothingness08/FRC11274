@@ -23,15 +23,14 @@ public final class AutosContainer {
   public final Command m_simpleAuto, m_findAprilTagAuto, m_moveToTargetF, m_moveToTargetB, m_moveToTargetL, m_moveToTargetR, m_AlignToTag;
   
   //SendableChooser<Command> m_chooser = new SendableChooser<>();
-  private final SendableChooser<Command> autoChooser;
+  private final SendableChooser<Command> m_chooser = new SendableChooser<>();
 
 
   public AutosContainer(SwerveDriveSubsystem swerveDrive, TelemetrySubsystem telemetrySubsystem) {
     m_swerveDriveSubsystem = swerveDrive;
     m_telemetrySubsystem = telemetrySubsystem;
 
-    autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData("Auto Chooser", autoChooser);
+    SmartDashboard.putData("Auto Chooser", m_chooser);
 
 
     m_simpleAuto = new SimpleAuto(m_swerveDriveSubsystem, m_telemetrySubsystem);
@@ -50,8 +49,6 @@ public final class AutosContainer {
   }
 
   public Command getSelectedAuto(){
-    return autoChooser.getSelected();
-
-    //return m_chooser.getSelected();
+    return m_chooser.getSelected();
   }
 }
