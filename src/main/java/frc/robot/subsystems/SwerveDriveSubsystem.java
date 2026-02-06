@@ -15,7 +15,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveDriveConstants;
@@ -98,30 +97,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
 
     m_pigeon = pigeon;
-  }
-
-  public ChassisSpeeds getRobotRelativeSpeeds() {
-    // Get current module states
-    SwerveModuleState[] moduleStates = new SwerveModuleState[4];
-    
-    for(int i = 0; i < 4; i++) {
-      // Get drive velocity in meters per second
-      double velocityMetersPerSecond = (m_DriveMotor[i].getVelocity().getValueAsDouble() / SwerveDriveConstants.DRIVER_GEAR_RATIO) * (Math.PI * 0.1016);
-      
-      // Account for motor being flipped
-      if(!motorFlipped[i]) {
-        velocityMetersPerSecond *= -1;
-      }
-      
-      // Get angle
-      double angleRotations = m_AngleMotor[i].getSelectedSensorPosition() / 4096.0;
-      Rotation2d angle = Rotation2d.fromRotations(angleRotations);
-      
-      moduleStates[i] = new SwerveModuleState(velocityMetersPerSecond, angle);
-    }
-    
-    // Convert module states to chassis speeds (robot-relative)
-    return SwerveDriveConstants.KINEMATICS.toChassisSpeeds(moduleStates);
   }
 
   private double distanceBetweenAngles(double a1, double a2){

@@ -4,16 +4,10 @@
 
 package frc.robot.subsystems;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.AprilTagConstants;
@@ -37,6 +31,33 @@ public class TelemetrySubsystem extends SubsystemBase {
       new Pose2d(0.0,0.0, Rotation2d.fromDegrees(0.0))
     );
 
+    RobotConfig config;
+    try {
+      config = RobotConfig.fromGUISettings();
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException("Failed to load PathPlanner RobotConfig");
+    }
+
+    AutoBuilder.configure(
+      this::getPose,
+      this::resetPose,
+      m_swerveDriveSubsystem::getRobotRelativeSpeeds,
+      (speeds, feedforwards) -> m_swerveDriveSubsystem.drive(speeds, false), 
+      new PPHolonomicDriveController(
+        new PIDConstants(5.0, 0.0, 0.0), 
+        new PIDConstants(5.0, 0.0, 0.0) 
+      ),
+      config,
+      () -> {
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isPresent()) {
+          return alliance.get() == DriverStation.Alliance.Red;
+        }
+        return false;
+      },
+      m_swerveDriveSubsystem 
+    );
 
   }
 

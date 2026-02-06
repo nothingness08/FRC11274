@@ -4,8 +4,6 @@
 
 package frc.robot.commands;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -42,13 +40,20 @@ public final class AutosContainer {
 
     m_AlignToTag = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(4.2, 11, Rotation2d.fromDegrees(0)));
 
-    //m_chooser.setDefaultOption("Simple Auto", m_simpleAuto);
-    //m_chooser.addOption("FindAprilTagAuto", m_findAprilTagAuto);
-    //m_chooser.addOption("Align Auto", m_AlignToTag);
-    //SmartDashboard.putData("Auto Mode",m_chooser);
+    m_chooser.setDefaultOption("Simple Auto", m_simpleAuto);
+    m_chooser.addOption("FindAprilTagAuto", m_findAprilTagAuto);
+    m_chooser.addOption("Align Auto", m_AlignToTag);
+    SmartDashboard.putData("Auto Mode",m_chooser);
   }
 
   public Command getSelectedAuto(){
     return m_chooser.getSelected();
+    return m_chooser.getSelected();
   }
+
+  //   private final Command m_complexAuto = new SequentialCommandGroup(
+  //   new SimpleAuto(m_swerveDriveSubsystem, m_telemetrySubsystem),
+  //   new WaitCommand(1.0), // Optional: wait 1 second between tasks
+  //   new FindAprilTagAuto(m_swerveDriveSubsystem, m_telemetrySubsystem)
+  // );
 }
