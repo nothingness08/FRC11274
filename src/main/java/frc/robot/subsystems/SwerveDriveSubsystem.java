@@ -56,7 +56,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
   private boolean[] motorFlipped = {false, false, false, false};
   private double wheelRadius = SwerveDriveConstants.robotWidth / Math.sqrt(2);
-  private double[][] rotAnglesComponents = {{ Math.sqrt(2)/2, Math.sqrt(2)/2}, {Math.sqrt(2)/2, -Math.sqrt(2)/2}, {-Math.sqrt(2)/2, Math.sqrt(2)/2}, {-Math.sqrt(2)/2, -Math.sqrt(2)/2}};
+  private double[][] rotAnglesComponents = {
+    { Math.sqrt(2)/2, Math.sqrt(2)/2}, 
+    {Math.sqrt(2)/2, -Math.sqrt(2)/2}, 
+    {-Math.sqrt(2)/2, Math.sqrt(2)/2}, 
+    {-Math.sqrt(2)/2, -Math.sqrt(2)/2}};
+  
   private Pigeon m_pigeon;
 
   public SwerveDriveSubsystem(Pigeon pigeon) {

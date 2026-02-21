@@ -48,7 +48,7 @@ public final class Constants {
       public static final int BACK_RIGHT_ID = 16;
 
       public static final double kF = 0.0;
-      public static final double kP = 0.3;
+      public static final double kP = 0.4;
       public static final double kI = 0.0;
       public static final double kD = 0.02;
     }

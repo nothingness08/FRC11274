@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
+import frc.robot.libs.LimelightHelpers;
 import frc.robot.subsystems.*;
 import frc.robot.systems.*;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -55,6 +56,8 @@ public class RobotContainer {
     m_swerveDriveSubsystem.setDefaultCommand(
       new DriveWithJoystick(m_swerveDriveSubsystem, m_driverController)
     );
+
+    LimelightHelpers.setupPortForwardingUSB(0);
   }
 
   private void configureButtonBindings() {
