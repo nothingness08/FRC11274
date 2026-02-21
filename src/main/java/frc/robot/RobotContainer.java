@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
+import frc.robot.systems.*;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
@@ -34,6 +35,10 @@ public class RobotContainer {
   
   private final AutosContainer m_autosContainer = new AutosContainer(m_swerveDriveSubsystem, m_telemetrySubsystem);
   
+  private ClimberSystem m_climberSystem = new ClimberSystem();
+  private IntakeSystem m_intakeSystem = new IntakeSystem();
+  private ShooterSubsystem m_shooterSystem = new ShooterSubsystem();
+
   Trigger xButton = m_driverController.x();
   Trigger yButton = m_driverController.y();
   Trigger aButton = m_driverController.a();

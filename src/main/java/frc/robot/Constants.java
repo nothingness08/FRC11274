@@ -66,6 +66,12 @@ public final class Constants {
     }
   }
 
+  public static final class ShooterConstants{
+    public static final String CANbus = "rio";
+    public static final int shooter_ID = 30; //temp
+    public static final int feeder_ID = 31;
+  }
+
   public static final class AprilTagConstants {
     public static final double TAG_X = 12.227;
     public static final double TAG_Y = 4.026;
