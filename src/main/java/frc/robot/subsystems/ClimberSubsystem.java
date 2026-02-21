@@ -60,7 +60,7 @@ public class ClimberSubsystem extends SubsystemBase {
     .withOpenLoopRampRate(Seconds.of(0.25));
 
   // Vendor motor controller object
-  private final TalonFX m_shooter = new TalonFX(ShooterConstants.shooter_ID, ShooterConstants.CANbus);
+  private final TalonFX m_shooter = new TalonFX(4, ShooterConstants.CANbus); //put in constants
 
   private SmartMotorController krakenSmartMotorController = new TalonFXWrapper(m_shooter, DCMotor.getKrakenX60(1), smcConfig);
 

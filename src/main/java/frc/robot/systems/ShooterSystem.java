@@ -11,10 +11,10 @@ import frc.robot.subsystems.*;
 
 public class ShooterSystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
-  private final FeederSubsystem m_feeder = new FeederSubsystem();
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
   public ShooterSystem() {}
 
+  
   /**
    * Example command factory method.
    *

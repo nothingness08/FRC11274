@@ -42,10 +42,10 @@ public final class Constants {
     public static final String CANbus = "rio";
 
     public static final class AngleMotors{
-      public static final int FRONT_LEFT_ID = 0; 
+      public static final int FRONT_LEFT_ID = 1; 
       public static final int FRONT_RIGHT_ID = 15; 
-      public static final int BACK_LEFT_ID = 2; 
-      public static final int BACK_RIGHT_ID = 13;
+      public static final int BACK_LEFT_ID = 3; 
+      public static final int BACK_RIGHT_ID = 16;
 
       public static final double kF = 0.0;
       public static final double kP = 0.3;
@@ -54,10 +54,10 @@ public final class Constants {
     }
 
     public static final class DriveMotors{
-      public static final int FRONT_LEFT_ID = 1; 
-      public static final int FRONT_RIGHT_ID = 14; 
-      public static final int BACK_LEFT_ID = 3; 
-      public static final int BACK_RIGHT_ID = 12;
+      public static final int FRONT_LEFT_ID = 0; 
+      public static final int FRONT_RIGHT_ID = 19; 
+      public static final int BACK_LEFT_ID = 2; 
+      public static final int BACK_RIGHT_ID = 17;
 
       public static final double kF = 0.0;
       public static final double kP = 0.3;
@@ -68,8 +68,8 @@ public final class Constants {
 
   public static final class ShooterConstants{
     public static final String CANbus = "rio";
-    public static final int shooter_ID = 30; //temp
-    public static final int feeder_ID = 31;
+    public static final int shooter_ID = 5; //temp
+    public static final int feeder_ID = 18;
   }
 
   public static final class AprilTagConstants {
