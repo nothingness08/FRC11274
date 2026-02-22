@@ -36,11 +36,12 @@ public class RobotContainer {
   private final SwerveDriveSubsystem m_swerveDriveSubsystem = new SwerveDriveSubsystem(m_pigeon);
   private final TelemetrySubsystem m_telemetrySubsystem = new TelemetrySubsystem(m_swerveDriveSubsystem, m_pigeon, m_limelightTwo);
   
-  private final AutosContainer m_autosContainer = new AutosContainer(m_swerveDriveSubsystem, m_telemetrySubsystem);
+  private ShooterSubsystem m_shooterSubsystem = new ShooterSubsystem();
+
+  private final AutosContainer m_autosContainer = new AutosContainer(m_swerveDriveSubsystem, m_telemetrySubsystem, m_shooterSubsystem);
   
   //private ClimberSystem m_climberSystem = new ClimberSystem();
   //private IntakeSystem m_intakeSystem = new IntakeSystem();
-  private ShooterSubsystem m_shooterSubsystem = new ShooterSubsystem();
 
   Trigger xButton = m_driverController.x();
   Trigger yButton = m_driverController.y();
@@ -61,8 +62,9 @@ public class RobotContainer {
   }
 
   private void configureButtonBindings() {
-    xButton.whileTrue(m_shooterSubsystem.set(0.8));
-    yButton.whileTrue(m_shooterSubsystem.set(0.9));
+    xButton.whileTrue(m_shooterSubsystem.set(0.2
+    ));
+    yButton.whileTrue(m_shooterSubsystem.set(0.93));
 
     //xButton.onTrue(m_autosContainer.m_moveToTargetL);
     //yButton.onTrue(m_autosContainer.m_moveToTargetF);
