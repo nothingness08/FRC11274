@@ -8,6 +8,7 @@ import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -54,6 +55,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   private double lastRotation = 0;
   private PIDController rotationController = new PIDController(0.1, 0, 0);
 
+  public static final double[] ANGLE_OFFSETS_TICKS = {
+    1136,  // FL - measure and fill these in
+    413,  // FR
+    -411,  // BL
+    1121   // BR
+  };
+
+  public double[] targetVelocities= {0,0,0,0}; 
+
   private boolean[] motorFlipped = {false, false, false, false};
   private double wheelRadius = SwerveDriveConstants.robotWidth / Math.sqrt(2);
   private double[][] rotAnglesComponents = {
@@ -66,6 +76,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
   public SwerveDriveSubsystem(Pigeon pigeon) {
     //make this for loop to initialize all 4 modules
+    int i = 0;
     for(WPI_TalonSRX angleMotor : m_AngleMotor) {
       angleMotor.configFactoryDefault();
 
@@ -85,7 +96,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
       angleMotor.config_kI(0, SwerveDriveConstants.AngleMotors.kI, 10);
       angleMotor.config_kD(0, SwerveDriveConstants.AngleMotors.kD, 10);
 
-      angleMotor.setSelectedSensorPosition(0, 0, 10); //try deleting this sometime, might make it absolute?
+      double absolutePosition = angleMotor.getSelectedSensorPosition();
+      System.out.println(i + ": " + absolutePosition);
+      angleMotor.setSelectedSensorPosition(absolutePosition - ANGLE_OFFSETS_TICKS[i], 0, 10);
+      System.out.println(i + ": " + absolutePosition);
+      offset[i] = angleMotor.getSelectedSensorPosition() % SwerveDriveConstants.TICKS_PER_REVOLUTION;
+      System.out.println(i + ": off " + offset[i]);
+      i++;
     }
 
     for(TalonFX driveMotor : m_DriveMotor) {
@@ -94,12 +111,13 @@ public class SwerveDriveSubsystem extends SubsystemBase {
       configs.Slot0.kP = SwerveDriveConstants.DriveMotors.kP;
       configs.Slot0.kI = SwerveDriveConstants.DriveMotors.kI;
       configs.Slot0.kD = SwerveDriveConstants.DriveMotors.kD;
-      configs.Slot0.kV = 2;
+      configs.Slot0.kV = SwerveDriveConstants.DriveMotors.kV;
+      configs.Slot0.kS = SwerveDriveConstants.DriveMotors.kS;
       
       configs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
       driveMotor.getConfigurator().apply(configs);
-
+      driveMotor.getVelocity().setUpdateFrequency(50);
     }
 
     m_pigeon = pigeon;
@@ -184,7 +202,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     double [][] velocitiesAndAngles = getVelocitiesAngles(ChassisSpeeds.discretize(speeds, 0.02), fieldRelative);
     
     for(int i = 0; i < 4; i++) {
-      double desiredPercentOutput = SwerveDriveConstants.MAXPERCENTOUTPUT * velocitiesAndAngles[i][0];
+      //double desiredPercentOutput = SwerveDriveConstants.MAXPERCENTOUTPUT * velocitiesAndAngles[i][0];
+      double targetVelocity =  10*velocitiesAndAngles[i][0];
       double currentAngle, flippedAngle, targetAngle;
       if(speeds.vxMetersPerSecond == 0 && speeds.vyMetersPerSecond == 0 && speeds.omegaRadiansPerSecond == 0){
         currentAngle = lastAngle[i];
@@ -202,9 +221,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         targetAngle = currentAngle;
       }
       if(!motorFlipped[i]){
-        desiredPercentOutput *= -1;
+        targetVelocity *= -1;
       }
-      m_DriveMotor[i].set(desiredPercentOutput);
+      //m_DriveMotor[i].set(desiredPercentOutput);
+      
+      VelocityVoltage m_velocityRequest = new VelocityVoltage(0);
+      double targetRPS = targetVelocity * (SwerveDriveConstants.DriveMotors.GEAR_RATIO)/(2*Math.PI * SwerveDriveConstants.WHEEL_RADIUS);
+      targetVelocities[i] = targetRPS;
+      m_DriveMotor[i].setControl(m_velocityRequest.withVelocity(targetRPS));
+      
       double currentTick = getCurrentTick(targetAngle, i);
       targetTick[i] = currentTick;
       lastAngle[i] = targetAngle;
@@ -215,7 +240,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   public SwerveModulePosition[] getModulePositions(){
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
     for(int i = 0; i < 4; i++){
-      double distanceMeters = (m_DriveMotor[i].getPosition().getValueAsDouble() / SwerveDriveConstants.DRIVER_GEAR_RATIO) * (Math.PI * 0.1016); //0.1016 is wheel diameter in meters
+      double distanceMeters = (m_DriveMotor[i].getPosition().getValueAsDouble() / SwerveDriveConstants.DriveMotors.GEAR_RATIO) * (2 * Math.PI * SwerveDriveConstants.WHEEL_RADIUS); //0.1016 is wheel diameter in meters
       double angleRotations = m_AngleMotor[i].getSelectedSensorPosition() / 4096.0;
       Rotation2d angle = Rotation2d.fromRotations(angleRotations);  
       positions[i] = new SwerveModulePosition(distanceMeters, angle);
@@ -228,7 +253,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     
     for(int i = 0; i < 4; i++) {
       // Get drive velocity in meters per second
-      double velocityMetersPerSecond = (m_DriveMotor[i].getVelocity().getValueAsDouble() / SwerveDriveConstants.DRIVER_GEAR_RATIO) * (Math.PI * 0.1016);
+      double velocityMetersPerSecond = (m_DriveMotor[i].getVelocity().getValueAsDouble() / SwerveDriveConstants.DriveMotors.GEAR_RATIO) * (2 * Math.PI * SwerveDriveConstants.WHEEL_RADIUS);
       
       // Account for motor being flipped
       if(!motorFlipped[i]) {
@@ -272,5 +297,15 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Target Angle FR: ", lastAngle[1]);
     SmartDashboard.putNumber("Target Angle BL: ", lastAngle[2]);
     SmartDashboard.putNumber("Target Angle BR: ", lastAngle[3]);
+
+    SmartDashboard.putNumber("Target Velocity FL: ", targetVelocities[0]);
+    SmartDashboard.putNumber("Target Velocity FR: ", targetVelocities[1]);
+    SmartDashboard.putNumber("Target Velocity BL: ", targetVelocities[2]);
+    SmartDashboard.putNumber("Target Velocity BR: ", targetVelocities[3]);
+
+    SmartDashboard.putNumber("A Velocity FL: ", m_DriveMotor[0].getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("A Velocity FR: ", m_DriveMotor[1].getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("A Velocity BL: ", m_DriveMotor[2].getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("A Velocity BR: ", m_DriveMotor[3].getVelocity().getValueAsDouble());
   }
 }

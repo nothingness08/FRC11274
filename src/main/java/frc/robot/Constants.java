@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
@@ -35,10 +34,9 @@ public final class Constants {
 
     public static final int TICKS_PER_REVOLUTION = 4096;
 
-    public static final double MAXPERCENTOUTPUT = 0.35;
+    public static final double MAXPERCENTOUTPUT = 0.15;
     public static final double ROTATEJOYSTICKSCALE = 1.5;
-    public static final double DRIVER_GEAR_RATIO = 6.86;
-
+    public static final double WHEEL_RADIUS = 0.051;
     public static final String CANbus = "rio";
 
     public static final class AngleMotors{
@@ -48,7 +46,7 @@ public final class Constants {
       public static final int BACK_RIGHT_ID = 16;
 
       public static final double kF = 0.0;
-      public static final double kP = 0.4;
+      public static final double kP = 0.75;
       public static final double kI = 0.0;
       public static final double kD = 0.02;
     }
@@ -59,10 +57,13 @@ public final class Constants {
       public static final int BACK_LEFT_ID = 2; 
       public static final int BACK_RIGHT_ID = 17;
 
-      public static final double kF = 0.0;
       public static final double kP = 0.3;
       public static final double kI = 0.0;
-      public static final double kD = 0.02;
+      public static final double kD = 0.0;
+      public static final double kV = 0.12;
+      public static final double kS = 0.0;
+
+      public static final double GEAR_RATIO = 0.2;
     }
   }
 

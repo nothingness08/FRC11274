@@ -64,7 +64,7 @@ public class RobotContainer {
   private void configureButtonBindings() {
     xButton.whileTrue(m_shooterSubsystem.set(0.2
     ));
-    yButton.whileTrue(m_shooterSubsystem.set(0.93));
+    yButton.whileTrue(m_shooterSubsystem.set(0.9));
 
     //xButton.onTrue(m_autosContainer.m_moveToTargetL);
     //yButton.onTrue(m_autosContainer.m_moveToTargetF);

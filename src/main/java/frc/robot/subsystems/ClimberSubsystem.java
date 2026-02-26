@@ -36,13 +36,16 @@ import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class ClimberSubsystem extends SubsystemBase {
 
+  //gemini guesses: kP: 15, kS: 0.2, kG: 0.8, kV: 0.12
+  //gemini instructions: set all to 0, increase kG until stops falling,
+  //increase kS until moves, kV = voltage per unit of speed, kP = snappiness
   private SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
     .withControlMode(ControlMode.CLOSED_LOOP)
     // Mechanism Circumference is the distance traveled by each mechanism rotation converting rotations to meters.
     .withMechanismCircumference(Meters.of(Inches.of(0.25).in(Meters) * 22))
     // Feedback Constants (PID Constants)
-    .withClosedLoopController(4, 0, 0, MetersPerSecond.of(0.5), MetersPerSecondPerSecond.of(0.5))
-    .withSimClosedLoopController(4, 0, 0, MetersPerSecond.of(0.5), MetersPerSecondPerSecond.of(0.5))
+    .withClosedLoopController(0, 0, 0, MetersPerSecond.of(0.5), MetersPerSecondPerSecond.of(1))
+    .withSimClosedLoopController(0, 0, 0, MetersPerSecond.of(0.5), MetersPerSecondPerSecond.of(1))
     // Feedforward Constants
     .withFeedforward(new ElevatorFeedforward(0, 0, 0))
     .withSimFeedforward(new ElevatorFeedforward(0, 0, 0))
@@ -51,11 +54,12 @@ public class ClimberSubsystem extends SubsystemBase {
     // Gearing from the motor rotor to final shaft.
     // In this example GearBox.fromReductionStages(3,4) is the same as GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to your motor.
     // You could also use .withGearing(12) which does the same thing.
-    .withGearing(new MechanismGearing(GearBox.fromReductionStages(3, 4)))
+    .withGearing(new MechanismGearing(GearBox.fromReductionStages(20)))
     // Motor properties to prevent over currenting.
     .withMotorInverted(false)
     .withIdleMode(MotorMode.BRAKE)
-    .withStatorCurrentLimit(Amps.of(40))
+    .withStatorCurrentLimit(Amps.of(80))
+    .withSupplyCurrentLimit(Amps.of(30))
     .withClosedLoopRampRate(Seconds.of(0.25))
     .withOpenLoopRampRate(Seconds.of(0.25));
 
@@ -64,11 +68,11 @@ public class ClimberSubsystem extends SubsystemBase {
 
   private SmartMotorController krakenSmartMotorController = new TalonFXWrapper(m_shooter, DCMotor.getKrakenX60(1), smcConfig);
 
-  private ElevatorConfig elevconfig = new ElevatorConfig(krakenSmartMotorController)
+  private ElevatorConfig elevconfig = new ElevatorConfig(krakenSmartMotorController) //fix the distances when we figure out starting config
       .withStartingHeight(Meters.of(0.5))
       .withHardLimits(Meters.of(0), Meters.of(3))
       .withTelemetry("Elevator", TelemetryVerbosity.HIGH)
-      .withMass(Pounds.of(16));
+      .withMass(Pounds.of(100)); //fix this
 
   // Elevator Mechanism
   private Elevator elevator = new Elevator(elevconfig);
