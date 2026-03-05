@@ -18,17 +18,18 @@ import frc.robot.subsystems.*;
 public class MoveToTargetAuto extends Command {
   private final SwerveDriveSubsystem m_swerveDrive;
   private final TelemetrySubsystem m_telemetrySubsystem;
+  private final Pose2d targetPos;
+
+  private final ProfiledPIDController thetaController = 
+    new ProfiledPIDController(1.5, 0.01, 0.01, 
+        new TrapezoidProfile.Constraints(6.28, 3.14));
 
   private final HolonomicDriveController holonomicController = 
     new HolonomicDriveController(
       new PIDController(1.1, 0, 0.005),
       new PIDController(1.1, 0, 0.005),
-      new ProfiledPIDController(1.5, 0.01, 0.01, 
-        new TrapezoidProfile.Constraints(6.28, 3.14)
-      )
+      thetaController
     );
-
-  private Pose2d targetPos;
   /*
   *
    * Creates a new ExampleCommand.
@@ -39,7 +40,8 @@ public class MoveToTargetAuto extends Command {
     m_swerveDrive = swerveDrive;
     this.targetPos = targetPos;
     m_telemetrySubsystem = telemetrySubsystem;
-    holonomicController.setTolerance(new Pose2d(0.05, 0.05, Rotation2d.fromDegrees(4)));
+
+    thetaController.enableContinuousInput(-Math.PI, Math.PI);
     addRequirements(m_swerveDrive);
   }
 
@@ -52,12 +54,16 @@ public class MoveToTargetAuto extends Command {
   @Override
   public void execute() {
     Pose2d currentPose = m_telemetrySubsystem.getPose();
+
     if(m_telemetrySubsystem.getLimelightTV()){
-      ChassisSpeeds newSpeeds = holonomicController.calculate(currentPose, targetPos, 0, targetPos.getRotation());
-      ChassisSpeeds newSpeedsFixed = new ChassisSpeeds(-newSpeeds.vxMetersPerSecond, newSpeeds.vyMetersPerSecond, -newSpeeds.omegaRadiansPerSecond);
-      m_swerveDrive.drive(newSpeedsFixed, false);
-    }
-    else{
+      ChassisSpeeds speeds = holonomicController.calculate(
+          currentPose, 
+          targetPos, 
+          0, 
+          targetPos.getRotation()
+      );
+      m_swerveDrive.drive(speeds, false);
+    } else {
       m_swerveDrive.drive(new ChassisSpeeds(0, 0, 0), true);
     }
   }
@@ -71,9 +77,12 @@ public class MoveToTargetAuto extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if(!m_telemetrySubsystem.getLimelightTV()){
-      return true;
-    }
-    return holonomicController.atReference();
+    Pose2d currentPose = m_telemetrySubsystem.getPose();
+    
+    double translationDist = currentPose.getTranslation().getDistance(targetPos.getTranslation());
+    double rotationDist = Math.abs(currentPose.getRotation().minus(targetPos.getRotation()).getDegrees());
+
+    
+    return translationDist < 0.05 && rotationDist < 4.0;
   }
 }

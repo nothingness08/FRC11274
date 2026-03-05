@@ -26,7 +26,7 @@ public class SimpleAutoTest extends Command {
   public SimpleAutoTest(SwerveDriveSubsystem swerveDrive, ShooterSubsystem shooterSubsystem) {
     m_swerveDrive = swerveDrive;
     m_ShooterSubsystem = shooterSubsystem;
-    m_ShooterSubsystem.set(0.93).schedule();
+    m_ShooterSubsystem.setDutyCycle(0.93).schedule();
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(m_swerveDrive, m_ShooterSubsystem);
   }
