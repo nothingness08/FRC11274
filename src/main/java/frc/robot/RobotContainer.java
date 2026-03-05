@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.*;
 import frc.robot.libs.LimelightHelpers;
 import frc.robot.subsystems.*;
-import frc.robot.systems.*;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
@@ -31,17 +30,15 @@ public class RobotContainer {
   private final CommandXboxController  m_driverController = new CommandXboxController (OIConstants.DRIVER_CONTROLLER_PORT);
 
   private final Pigeon m_pigeon = new Pigeon();
-  private final LimelightSubsystem m_limelightTwo = new LimelightSubsystem("limelight-two");
+  private final LimelightSubsystem m_limelightThree = new LimelightSubsystem("limelight");
 
   private final SwerveDriveSubsystem m_swerveDriveSubsystem = new SwerveDriveSubsystem(m_pigeon);
-  private final TelemetrySubsystem m_telemetrySubsystem = new TelemetrySubsystem(m_swerveDriveSubsystem, m_pigeon, m_limelightTwo);
+  private final TelemetrySubsystem m_telemetrySubsystem = new TelemetrySubsystem(m_swerveDriveSubsystem, m_pigeon, m_limelightThree);
   
   private ShooterSubsystem m_shooterSubsystem = new ShooterSubsystem();
+  private ClimberSubsystem m_climberSubsystem = new ClimberSubsystem();
 
   private final AutosContainer m_autosContainer = new AutosContainer(m_swerveDriveSubsystem, m_telemetrySubsystem, m_shooterSubsystem);
-  
-  //private ClimberSystem m_climberSystem = new ClimberSystem();
-  //private IntakeSystem m_intakeSystem = new IntakeSystem();
 
   Trigger xButton = m_driverController.x();
   Trigger yButton = m_driverController.y();
@@ -52,7 +49,7 @@ public class RobotContainer {
   public RobotContainer() {
     configureButtonBindings();
 
-    m_shooterSubsystem.setDefaultCommand(m_shooterSubsystem.set(0));
+    m_shooterSubsystem.setDefaultCommand(m_shooterSubsystem.setDutyCycle(0));
 
     m_swerveDriveSubsystem.setDefaultCommand(
       new DriveWithJoystick(m_swerveDriveSubsystem, m_driverController)
@@ -62,9 +59,37 @@ public class RobotContainer {
   }
 
   private void configureButtonBindings() {
-    xButton.whileTrue(m_shooterSubsystem.set(0.2
-    ));
-    yButton.whileTrue(m_shooterSubsystem.set(0.9));
+    // xButton.whileTrue(m_shooterSubsystem.setDutyCycle(0.5));
+    // yButton.whileTrue(m_shooterSubsystem.setDutyCycle(0.95));
+
+    // m_driverController.povUp()
+    //     .whileTrue(m_climberSubsystem.setDutyCycle(0.3));
+
+    // m_driverController.povDown()
+    //     .whileTrue(m_climberSubsystem.setDutyCycle(-0.3));
+
+    // m_driverController.leftBumper()
+    // .onTrue(m_climberSubsystem.setPosition(0, false));
+
+    // m_driverController.rightBumper()
+    //     .onTrue(m_climberSubsystem.setPosition(45, false));
+
+    // m_driverController.leftTrigger()
+    // .onTrue(m_climberSubsystem.setPosition(10, true));
+
+    //m_driverController.a().onTrue(m_climberSubsystem.switchLimitsCommand());
+    //m_driverController.b().onTrue(m_climberSubsystem.setCurrentPosToZeroCommand());
+
+    // m_driverController.x().whileTrue(m_shooterSubsystem.shootSequence(-0.8, 35));
+    // m_driverController.y().whileTrue(m_shooterSubsystem.shootSequence(-0.8, 40)); //8 m/s
+    // m_driverController.b().whileTrue(m_shooterSubsystem.shootSequence(-0.8, 50));
+    // m_driverController.rightTrigger().whileTrue(m_shooterSubsystem.setDutyCycleFeeder(-0.8));
+    m_driverController.rightTrigger().onTrue(m_shooterSubsystem.setVelocity(5));
+    m_driverController.a().onTrue(m_shooterSubsystem.setVelocity(60));
+    m_driverController.b().onTrue(m_shooterSubsystem.setVelocity(40));
+    m_driverController.y().onTrue(m_shooterSubsystem.setVelocity(30));
+    m_driverController.x().onTrue(m_shooterSubsystem.setVelocity(0));
+
 
     //xButton.onTrue(m_autosContainer.m_moveToTargetL);
     //yButton.onTrue(m_autosContainer.m_moveToTargetF);

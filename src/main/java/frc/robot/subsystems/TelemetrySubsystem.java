@@ -21,15 +21,15 @@ import frc.robot.Constants.SwerveDriveConstants;
 import frc.robot.libs.LimelightHelpers;
 
 public class TelemetrySubsystem extends SubsystemBase {
-  private LimelightSubsystem m_limelightTwo;
+  private LimelightSubsystem m_limelight;
   private final SwerveDrivePoseEstimator m_poseEstimator;
   private Pigeon m_pigeon;
   private SwerveDriveSubsystem m_swerveDriveSubsystem;
 
-  public TelemetrySubsystem(SwerveDriveSubsystem swerveDriveSubsystem, Pigeon pigeon, LimelightSubsystem limelightTwo) {
+  public TelemetrySubsystem(SwerveDriveSubsystem swerveDriveSubsystem, Pigeon pigeon, LimelightSubsystem limelight) {
     m_swerveDriveSubsystem = swerveDriveSubsystem;
     m_pigeon = pigeon;
-    m_limelightTwo = limelightTwo;
+    m_limelight = limelight;
     m_poseEstimator = new SwerveDrivePoseEstimator(
       SwerveDriveConstants.KINEMATICS,
       Rotation2d.fromDegrees(m_pigeon.getYaw()),
@@ -81,11 +81,11 @@ public class TelemetrySubsystem extends SubsystemBase {
   }
 
   public boolean getLimelightTV(){
-    return m_limelightTwo.getTV();
+    return m_limelight.getTV();
   } 
 
   public double[] getBotPose_TargetSpace(){
-    return LimelightHelpers.getBotPose_TargetSpace(m_limelightTwo.getLimelightName());
+    return LimelightHelpers.getBotPose_TargetSpace(m_limelight.getLimelightName());
   }
 
   public void resetPose(Pose2d newPose){
@@ -103,11 +103,11 @@ public class TelemetrySubsystem extends SubsystemBase {
       m_swerveDriveSubsystem.getModulePositions()
     );
     boolean doRejectUpdate = false;
-    LimelightHelpers.SetRobotOrientation(m_limelightTwo.getLimelightName(), 
+    LimelightHelpers.SetRobotOrientation(m_limelight.getLimelightName(), 
       m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 
       0, 0, 0, 0, 0);
     LimelightHelpers.PoseEstimate mt2 = 
-      LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(m_limelightTwo.getLimelightName());
+      LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(m_limelight.getLimelightName());
 
     if (Math.abs(m_pigeon.getRate()) > 360) {
       doRejectUpdate = true;
@@ -123,11 +123,11 @@ public class TelemetrySubsystem extends SubsystemBase {
     }
 
     Pose2d poseEstimate = getPose();
-    SmartDashboard.putNumber("Estimated X", poseEstimate.getX());
-    SmartDashboard.putNumber("Estimated Y", poseEstimate.getY());
-    SmartDashboard.putNumber("Estimated Rotation", poseEstimate.getRotation().getDegrees());
+    // SmartDashboard.putNumber("Estimated X", poseEstimate.getX());
+    // SmartDashboard.putNumber("Estimated Y", poseEstimate.getY());
+    // SmartDashboard.putNumber("Estimated Rotation", poseEstimate.getRotation().getDegrees());
 
-    SmartDashboard.putNumber("Estimated X in", poseEstimate.getX()*39.37);
-    SmartDashboard.putNumber("Estimated Y in", poseEstimate.getY()*39.37);
+    // SmartDashboard.putNumber("Estimated X in", poseEstimate.getX()*39.37);
+    // SmartDashboard.putNumber("Estimated Y in", poseEstimate.getY()*39.37);
   }
 }

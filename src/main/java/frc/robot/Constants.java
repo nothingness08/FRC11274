@@ -17,8 +17,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
  */
 public final class Constants {
   public static final class SwerveDriveConstants {
-    public static final double robotWidth = 0.762; // Distance between left and right wheels in meters
-    public static final double robotLength = 0.762;  // Distance between front and back wheels in meters
+    public static final double robotWidth = 0.508; // Distance between left and right wheels in meters
+    public static final double robotLength = 0.442;  // Distance between front and back wheels in meters
     public static final double kMaxSpeedMetersPerSecond = 3.0; // Maximum speed of the robot
     public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI; // Maximum angular speed
 
@@ -31,11 +31,17 @@ public final class Constants {
 
     public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(FRONT_LEFT_LOCATION, FRONT_RIGHT_LOCATION, BACK_LEFT_LOCATION, BACK_RIGHT_LOCATION);
 
+    public static final double[] ANGLE_OFFSETS_TICKS = {
+      3218,  // FL 1170
+      2473,  // FR 425
+      1688,  // BL 3736
+      922   // BR 2970
+    };
 
     public static final int TICKS_PER_REVOLUTION = 4096;
 
-    public static final double MAXPERCENTOUTPUT = 0.15;
-    public static final double ROTATEJOYSTICKSCALE = 1.5;
+    public static final double DRIVE_SPEED = 0.5; // m/s
+    public static final double ROTATE_SPEED = 1; // rad/s
     public static final double WHEEL_RADIUS = 0.051;
     public static final String CANbus = "rio";
 
@@ -69,8 +75,28 @@ public final class Constants {
 
   public static final class ShooterConstants{
     public static final String CANbus = "rio";
-    public static final int shooter_ID = 5; //temp
-    public static final int feeder_ID = 18;
+    public static final int shooter_ID = 5; 
+    public static final int shooter2_ID = 18;
+    public static final int feeder_ID = 14;
+
+    public static final double kP = 0.7; 
+    public static final double kI = 0.0;
+    public static final double kV = 0.117;
+    public static final double kS = 0.24;
+
+    public static final double GEAR_RATIO = 1.5;
+  }
+
+  public static final class ClimberConstants{
+    public static final int CLIMBER_ID = 4;
+    public static final String CANbus = "rio";
+    public static final double MAX_HEIGHT_ROTATIONS = 55;
+
+    public static final double kP_Align = 0.5;
+    public static final double kG_Align = 0.0;
+
+    public static final double kP_Climb = 0.5;
+    public static final double kG_Climb = 0.01;
   }
 
   public static final class AprilTagConstants {

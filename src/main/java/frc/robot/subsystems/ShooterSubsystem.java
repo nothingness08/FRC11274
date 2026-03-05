@@ -4,140 +4,113 @@
 
 package frc.robot.subsystems;
 
+import frc.robot.Constants.ClimberConstants;
 import frc.robot.Constants.ShooterConstants;
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Feet;
-import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.RPM;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import yams.motorcontrollers.SmartMotorController;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
-import yams.mechanisms.SmartMechanism;
-import yams.mechanisms.config.FlyWheelConfig;
-import yams.mechanisms.velocity.FlyWheel;
-import yams.motorcontrollers.SmartMotorControllerConfig;
-import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.remote.TalonFXWrapper;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 
 public class ShooterSubsystem extends SubsystemBase {
-
-  private SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
-  .withFollowers(Pair.of(new TalonFX(ShooterConstants.feeder_ID, ShooterConstants.CANbus), true))
-  
-  .withControlMode(ControlMode.CLOSED_LOOP)
-  // Feedback Constants (PID Constants)
-  .withClosedLoopController(0, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-  .withSimClosedLoopController(0, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-  // Feedforward Constants
-  .withFeedforward(new SimpleMotorFeedforward(0, 0, 0))
-  .withSimFeedforward(new SimpleMotorFeedforward(0, 0, 0))
-  // Telemetry name and verbosity level
-  .withTelemetry("ShooterMotor", TelemetryVerbosity.HIGH)
-  // Gearing from the motor rotor to final shaft.
-  // In this example GearBox.fromReductionStages(3,4) is the same as GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to your motor.
-  // You could also use .withGearing(12) which does the same thing.
-  .withGearing(new MechanismGearing(GearBox.fromStages("40:60")))
-  // Motor properties to prevent over currenting.
-  .withMotorInverted(false)
-  .withIdleMode(MotorMode.COAST)
-  .withStatorCurrentLimit(Amps.of(40));
-
-
   private final TalonFX m_shooter = new TalonFX(ShooterConstants.shooter_ID, ShooterConstants.CANbus);
-
-  private SmartMotorController krakenSmartMotorController = new TalonFXWrapper(m_shooter, DCMotor.getKrakenX60(1), smcConfig);
-
+  private final TalonFX m_follower = new TalonFX(ShooterConstants.shooter2_ID, ShooterConstants.CANbus);
   
- private final FlyWheelConfig shooterConfig = new FlyWheelConfig(krakenSmartMotorController)
-  // Diameter of the flywheel.
-  .withDiameter(Inches.of(4))
-  // Mass of the flywheel.
-  .withMass(Pounds.of(3.2))
-  // Maximum speed of the shooter.
-  .withUpperSoftLimit(RPM.of(1000))
-  // Telemetry name and verbosity for the arm.
-  .withTelemetry("ShooterMech", TelemetryVerbosity.HIGH);
+  private final TalonFX m_feeder = new TalonFX(ShooterConstants.feeder_ID, ShooterConstants.CANbus);
+  Follower toFollowLeader = new Follower(m_shooter.getDeviceID(), MotorAlignmentValue.Opposed);
 
-  // Shooter Mechanism
-  private FlyWheel shooter = new FlyWheel(shooterConfig);
+  public ShooterSubsystem() {
+    TalonFXConfiguration configs = new TalonFXConfiguration();
 
+    configs.Slot0.kV = ShooterConstants.kV;
+    configs.Slot0.kP = ShooterConstants.kP;
+    configs.Slot0.kS = ShooterConstants.kS;
+    configs.Slot0.kI = ShooterConstants.kI;
 
-   /**
-   * Gets the current velocity of the shooter.
-   *
-   * @return Shooter velocity.
-   */
-  public AngularVelocity getVelocity() {return shooter.getSpeed();}
+    configs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-  /**
-   * Set the shooter velocity.
-   *
-   * @param speed Speed to set.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
-   */
-  public Command setVelocity(AngularVelocity speed) {return shooter.run(speed);}
-  
-  /**
-   * Set the shooter velocity setpoint.
-   *
-   * @param speed Speed to set
-   */
-  public void setVelocitySetpoint(AngularVelocity speed) {shooter.setMechanismVelocitySetpoint(speed);}
+    configs.Voltage.PeakForwardVoltage = 11.0;
+    configs.Voltage.PeakReverseVoltage = -11.0;
+    
+    configs.CurrentLimits.SupplyCurrentLimit = 60;
+    configs.CurrentLimits.SupplyCurrentLimitEnable = true;
+    
+    configs.CurrentLimits.StatorCurrentLimit = 60;
+    configs.CurrentLimits.StatorCurrentLimitEnable = true;
 
-  /**
-   * Set the dutycycle of the shooter.
-   *
-   * @param dutyCycle DutyCycle to set.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
-   */
-  public Command set(double dutyCycle) {return shooter.set(dutyCycle);}
-  /** Creates a new ExampleSubsystem. */
-  public ShooterSubsystem() {}
+    m_shooter.getConfigurator().apply(configs);
 
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
+    m_follower.setControl(toFollowLeader);
   }
 
   /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
+   * Move the elevator up and down.
+   * @param dutycycle [-1, 1] speed to set the elevator too.
    */
-  public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
-    return false;
+  public Command setDutyCycle(double dutycycle) { 
+    return run(() -> m_shooter.setControl(new DutyCycleOut(dutycycle)))
+      .finallyDo(() -> stop()); 
+  }
+
+  public void stop() {
+    m_shooter.setControl(new DutyCycleOut(0));
+  }
+
+  public Command setDutyCycleFeeder(double dutycycle) { 
+    return run(() -> m_feeder.setControl(new DutyCycleOut(dutycycle)))
+      .finallyDo(() -> stopFeeder()); 
+  }
+
+  public void stopFeeder() {
+    m_feeder.setControl(new DutyCycleOut(0));
+  }
+
+  public Command setVelocity(double velocityRPS) {
+    return run(() -> m_shooter.setControl(new VelocityVoltage(velocityRPS).withSlot(0)))
+      .finallyDo((interrupted) -> stop());
+  }
+
+  public double getVelocity() {
+    // refresh() is called to get the most up-to-date data from the CAN bus
+    return m_shooter.getVelocity().refresh().getValueAsDouble();
+  }
+
+  public boolean atSetpoint(double targetRPS) {
+    return Math.abs(getVelocity() - targetRPS) < 3.0; 
+  }
+
+  public Command shootSequence(double feederPercent, double shooterRPS) {
+    return run(() -> {
+       m_shooter.setControl(new VelocityVoltage(shooterRPS).withSlot(0));
+
+      // 2. Only run the feeder if the shooter is at speed
+      if (atSetpoint(shooterRPS)) {
+        m_feeder.setControl(new DutyCycleOut(feederPercent));
+      } else {
+        m_feeder.setControl(new DutyCycleOut(0));
+      }
+    })
+    .finallyDo((interrupted) -> {
+      stop();
+      stopFeeder();
+    });
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    
+    SmartDashboard.putNumber("Flywheel RPS", getVelocity());
   }
 
   @Override

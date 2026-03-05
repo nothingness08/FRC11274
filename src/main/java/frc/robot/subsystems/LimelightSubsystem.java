@@ -15,14 +15,14 @@ public class LimelightSubsystem extends SubsystemBase {
     LIMELIGHT_NAME = name;
     LimelightHelpers.setPipelineIndex(LIMELIGHT_NAME, 0);
 
-    if(LIMELIGHT_NAME == "limelight-two"){
+    if(LIMELIGHT_NAME == "limelight"){
       LimelightHelpers.setCameraPose_RobotSpace(LIMELIGHT_NAME, 
-          0.1,    
-          0.0635,   
-          0.343,
+          -0.3175,    
+          -0.00381,   
+          0.42418,
           0.0, 
-          0,  
-          4    
+          7,  
+          180    
       );
     }
   }
@@ -37,8 +37,8 @@ public class LimelightSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putBoolean("TV", LimelightHelpers.getTV(LIMELIGHT_NAME));
-    SmartDashboard.putNumber("TX", LimelightHelpers.getTX(LIMELIGHT_NAME));
-    SmartDashboard.putNumber("TY", LimelightHelpers.getTY(LIMELIGHT_NAME));
+    // SmartDashboard.putBoolean("TV", LimelightHelpers.getTV(LIMELIGHT_NAME));
+    // SmartDashboard.putNumber("TX", LimelightHelpers.getTX(LIMELIGHT_NAME));
+    // SmartDashboard.putNumber("TY", LimelightHelpers.getTY(LIMELIGHT_NAME));
   }
 }

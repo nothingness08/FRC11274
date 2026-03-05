@@ -20,10 +20,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.ClimberConstants;
 import frc.robot.Constants.SwerveDriveConstants;
 
 public class SwerveDriveSubsystem extends SubsystemBase {
-  private boolean isColdBoot;
 
   //put this into array later for all 4 modules
   private final WPI_TalonSRX m_frontLeftAngleMotor = new WPI_TalonSRX(SwerveDriveConstants.AngleMotors.FRONT_LEFT_ID);
@@ -57,12 +57,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   private double lastRotation = 0;
   private PIDController rotationController = new PIDController(0.1, 0, 0);
 
-  public static final double[] ANGLE_OFFSETS_TICKS = {
-    1170,  // FL
-    425,  // FR
-    3736,  // BL
-    2970   // BR
-  };
 
   public double[] targetRPSs= {0,0,0,0}; 
 
@@ -97,14 +91,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
       angleMotor.config_kP(0, SwerveDriveConstants.AngleMotors.kP, 10);
       angleMotor.config_kI(0, SwerveDriveConstants.AngleMotors.kI, 10);
       angleMotor.config_kD(0, SwerveDriveConstants.AngleMotors.kD, 10);
-      //Maybe try this? double absolutePosition = angleMotor.getSensorCollection().getPulseWidthPosition() & 0xFFF;
-      //
-      int currentTick = angleMotor.getSensorCollection().getPulseWidthPosition() & 0xFFF;
-      angleMotor.setSelectedSensorPosition(currentTick - ANGLE_OFFSETS_TICKS[i]); //I want this too only run on robot power on, not on code deployment
       
-      //angleMotor.set(TalonSRXControlMode.Position, 0);
-      //angleMotor.setSelectedSensorPosition(0, 0, 10);
-      //angleMotor.set(TalonSRXControlMode.Position, 0);
+      int currentTick = angleMotor.getSensorCollection().getPulseWidthPosition() & 0xFFF;
+      angleMotor.setSelectedSensorPosition(currentTick - SwerveDriveConstants.ANGLE_OFFSETS_TICKS[i]); 
       i++;
     }
 
@@ -201,9 +190,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     //   newRotationVelocity = (-1* rotationController.calculate(m_pigeon.getYaw(), lastRotation));
     // }
     // newSpeeds = new ChassisSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, newRotationVelocity);
-    System.out.println("vy: "+ speeds.vyMetersPerSecond); //we want robot to be going this speed (m/s)
     double [][] velocitiesAndAngles = getVelocitiesAngles(ChassisSpeeds.discretize(speeds, 0.02), fieldRelative);
-    System.out.println("FL v" + velocitiesAndAngles[0][0]); //we want each module to be going this speed (m/s)
     for(int i = 0; i < 4; i++) {
       double targetVelocity =  velocitiesAndAngles[i][0]; //(m/s)
       double currentAngle, flippedAngle, targetAngle;
@@ -222,7 +209,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         motorFlipped[i] = false;
         targetAngle = currentAngle;
       }
-      if(!motorFlipped[i]){
+      if(motorFlipped[i]){
         targetVelocity *= -1;
       }
       //m_DriveMotor[i].set(desiredPercentOutput);
@@ -242,7 +229,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   public SwerveModulePosition[] getModulePositions(){
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
     for(int i = 0; i < 4; i++){
-      double distanceMeters = (m_DriveMotor[i].getPosition().getValueAsDouble() / SwerveDriveConstants.DriveMotors.GEAR_RATIO) * (2 * Math.PI * SwerveDriveConstants.WHEEL_RADIUS); //0.1016 is wheel diameter in meters
+      double distanceMeters = (m_DriveMotor[i].getPosition().getValueAsDouble() * SwerveDriveConstants.DriveMotors.GEAR_RATIO) * (2 * Math.PI * SwerveDriveConstants.WHEEL_RADIUS);
       double angleRotations = m_AngleMotor[i].getSelectedSensorPosition() / 4096.0;
       Rotation2d angle = Rotation2d.fromRotations(angleRotations);  
       positions[i] = new SwerveModulePosition(distanceMeters, angle);
@@ -255,10 +242,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     
     for(int i = 0; i < 4; i++) {
       // Get drive velocity in meters per second
-      double velocityMetersPerSecond = (m_DriveMotor[i].getVelocity().getValueAsDouble() / SwerveDriveConstants.DriveMotors.GEAR_RATIO) * (2 * Math.PI * SwerveDriveConstants.WHEEL_RADIUS);
+      double velocityMetersPerSecond = (m_DriveMotor[i].getVelocity().getValueAsDouble() * SwerveDriveConstants.DriveMotors.GEAR_RATIO) * (2 * Math.PI * SwerveDriveConstants.WHEEL_RADIUS);
       
       // Account for motor being flipped
-      if(!motorFlipped[i]) {
+      if(motorFlipped[i]) {
         velocityMetersPerSecond *= -1;
       }
       
@@ -284,30 +271,30 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
 
-    SmartDashboard.putNumber("Actual Tick FL: ", m_AngleMotor[0].getSelectedSensorPosition());
-    SmartDashboard.putNumber("Actual Tick FR: ", m_AngleMotor[1].getSelectedSensorPosition());
-    SmartDashboard.putNumber("Actual Tick BL: ", m_AngleMotor[2].getSelectedSensorPosition());
-    SmartDashboard.putNumber("Actual Tick BR: ", m_AngleMotor[3].getSelectedSensorPosition());
+    // SmartDashboard.putNumber("Actual Tick FL: ", m_AngleMotor[0].getSelectedSensorPosition());
+    // SmartDashboard.putNumber("Actual Tick FR: ", m_AngleMotor[1].getSelectedSensorPosition());
+    // SmartDashboard.putNumber("Actual Tick BL: ", m_AngleMotor[2].getSelectedSensorPosition());
+    // SmartDashboard.putNumber("Actual Tick BR: ", m_AngleMotor[3].getSelectedSensorPosition());
 
-    double[] deltas = getDeltaTarget();
-    SmartDashboard.putNumber("Delta Tick FL: ", deltas[0]);
-    SmartDashboard.putNumber("Delta Tick FR: ", deltas[1]);
-    SmartDashboard.putNumber("Delta Tick BL: ", deltas[2]);
-    SmartDashboard.putNumber("Delta Tick BR: ", deltas[3]);
+    // double[] deltas = getDeltaTarget();
+    // SmartDashboard.putNumber("Delta Tick FL: ", deltas[0]);
+    // SmartDashboard.putNumber("Delta Tick FR: ", deltas[1]);
+    // SmartDashboard.putNumber("Delta Tick BL: ", deltas[2]);
+    // SmartDashboard.putNumber("Delta Tick BR: ", deltas[3]);
 
-    SmartDashboard.putNumber("Target Angle FL: ", lastAngle[0]);
-    SmartDashboard.putNumber("Target Angle FR: ", lastAngle[1]);
-    SmartDashboard.putNumber("Target Angle BL: ", lastAngle[2]);
-    SmartDashboard.putNumber("Target Angle BR: ", lastAngle[3]);
+    // SmartDashboard.putNumber("Target Angle FL: ", lastAngle[0]);
+    // SmartDashboard.putNumber("Target Angle FR: ", lastAngle[1]);
+    // SmartDashboard.putNumber("Target Angle BL: ", lastAngle[2]);
+    // SmartDashboard.putNumber("Target Angle BR: ", lastAngle[3]);
 
-    SmartDashboard.putNumber("T RPS FL: ", targetRPSs[0]);
-    SmartDashboard.putNumber("T RPS FR: ", targetRPSs[1]);
-    SmartDashboard.putNumber("T RPS BL: ", targetRPSs[2]);
-    SmartDashboard.putNumber("T RPS BR: ", targetRPSs[3]);
+    // SmartDashboard.putNumber("T RPS FL: ", targetRPSs[0]);
+    // SmartDashboard.putNumber("T RPS FR: ", targetRPSs[1]);
+    // SmartDashboard.putNumber("T RPS BL: ", targetRPSs[2]);
+    // SmartDashboard.putNumber("T RPS BR: ", targetRPSs[3]);
 
-    SmartDashboard.putNumber("A RPS FL: ", m_DriveMotor[0].getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("A RPS FR: ", m_DriveMotor[1].getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("A RPS BL: ", m_DriveMotor[2].getVelocity().getValueAsDouble());
-    SmartDashboard.putNumber("A RPS BR: ", m_DriveMotor[3].getVelocity().getValueAsDouble());
+    // SmartDashboard.putNumber("A RPS FL: ", m_DriveMotor[0].getVelocity().getValueAsDouble()); Maybe test this more later
+    // SmartDashboard.putNumber("A RPS FR: ", m_DriveMotor[1].getVelocity().getValueAsDouble());
+    // SmartDashboard.putNumber("A RPS BL: ", m_DriveMotor[2].getVelocity().getValueAsDouble());
+    // SmartDashboard.putNumber("A RPS BR: ", m_DriveMotor[3].getVelocity().getValueAsDouble());
   }
 }
