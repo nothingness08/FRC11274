@@ -30,13 +30,14 @@ public class ShooterSubsystem extends SubsystemBase {
   private final TalonFX m_feeder = new TalonFX(ShooterConstants.feeder_ID, ShooterConstants.CANbus);
   Follower toFollowLeader = new Follower(m_shooter.getDeviceID(), MotorAlignmentValue.Opposed);
 
+  public double shooterRPS = 30;
+
   public ShooterSubsystem() {
     TalonFXConfiguration configs = new TalonFXConfiguration();
 
     configs.Slot0.kV = ShooterConstants.kV;
     configs.Slot0.kP = ShooterConstants.kP;
     configs.Slot0.kS = ShooterConstants.kS;
-    configs.Slot0.kI = ShooterConstants.kI;
 
     configs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
@@ -107,9 +108,15 @@ public class ShooterSubsystem extends SubsystemBase {
     });
   }
 
+  // public void increaseSpeed(){
+  //   shooterRPS++;
+  // }
+  // public void decreaseSpeed(){
+  //   shooterRPS--;
+  // }
   @Override
   public void periodic() {
-    
+    SmartDashboard.putNumber("Target RPS", shooterRPS);
     SmartDashboard.putNumber("Flywheel RPS", getVelocity());
   }
 

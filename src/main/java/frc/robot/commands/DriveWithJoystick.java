@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -12,16 +14,24 @@ import frc.robot.Constants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.SwerveDriveConstants;
 import frc.robot.subsystems.SwerveDriveSubsystem;
+import frc.robot.subsystems.TelemetrySubsystem;
+import java.util.function.BooleanSupplier;
 
 /** An example command that uses an example subsystem. */
 public class DriveWithJoystick extends Command {
   private final SwerveDriveSubsystem m_swerveDrive;
   private final CommandXboxController  m_controller;
+  private final TelemetrySubsystem m_telemetrySubsystem;
 
-  public DriveWithJoystick(SwerveDriveSubsystem swerveDrive, CommandXboxController controller) {
+  private final PIDController pidController = new PIDController(0.07, 0, 0);
+  private BooleanSupplier alignToHub, alignToJoystick;
+
+  public DriveWithJoystick(SwerveDriveSubsystem swerveDrive, CommandXboxController controller, TelemetrySubsystem telemetrySubsystem, BooleanSupplier alignToHub, BooleanSupplier alignToJoystick) {
     m_swerveDrive = swerveDrive;
     m_controller = controller;
-    // Use addRequirements() to tell the scheduler that this command requires the subsystem.
+    m_telemetrySubsystem = telemetrySubsystem;
+    this.alignToHub = alignToHub;
+    this.alignToJoystick = alignToJoystick;
     addRequirements(m_swerveDrive);
   }
 
@@ -33,10 +43,11 @@ public class DriveWithJoystick extends Command {
   @Override
   public void execute() {
     // Get driver inputs from the sticks
-    // Invert Y axis because WPILib treats positive Y as down by default
+
     double xSpeed = m_controller.getLeftX(); 
     double ySpeed = -m_controller.getLeftY();
-    double rot = m_controller.getRightX();
+    double rot = m_controller.getRightX(); //rotate with joystick
+    System.out.println("rot speed normal: " + rot);
 
     double mag = Math.sqrt(Math.pow(ySpeed, 2) + Math.pow(xSpeed, 2));
     if(mag < OIConstants.CONTROLLER_DEADBAND) {
@@ -46,6 +57,13 @@ public class DriveWithJoystick extends Command {
     rot = Math.abs(rot) > OIConstants.CONTROLLER_DEADBAND ? rot : 0.0;
     xSpeed *= (1/(mag));
     ySpeed *= (1/(mag));
+    if(alignToJoystick.getAsBoolean()){
+      //rot = -pidController.calculate(m_telemetrySubsystem.getPose().getRotation().getDegrees(), Math.atan2(m_controller.getRightY(), m_controller.getRightX()));
+    }
+    if(alignToHub.getAsBoolean()){ //align to hub
+      rot = -pidController.calculate(m_telemetrySubsystem.getPose().getRotation().getDegrees(), m_telemetrySubsystem.targetRotation().getDegrees());
+    }
+    
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
       xSpeed * SwerveDriveConstants.DRIVE_SPEED, ySpeed *SwerveDriveConstants.DRIVE_SPEED, rot*SwerveDriveConstants.ROTATE_SPEED);
 

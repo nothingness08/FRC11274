@@ -4,20 +4,21 @@
 
 package frc.robot;
 
-import frc.robot.Constants.OIConstants;
-
-import static edu.wpi.first.units.Units.RPM;
-
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.*;
+import frc.robot.Constants.OIConstants;
+import frc.robot.commands.AutosContainer;
+import frc.robot.commands.DriveWithJoystick;
 import frc.robot.libs.LimelightHelpers;
-import frc.robot.subsystems.*;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.subsystems.ClimberSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.LimelightSubsystem;
+import frc.robot.subsystems.Pigeon;
+import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.SwerveDriveSubsystem;
+import frc.robot.subsystems.TelemetrySubsystem;
 
 
 /**
@@ -37,6 +38,7 @@ public class RobotContainer {
   
   private ShooterSubsystem m_shooterSubsystem = new ShooterSubsystem();
   private ClimberSubsystem m_climberSubsystem = new ClimberSubsystem();
+  private IntakeSubsystem m_intakeSubsystem = new IntakeSubsystem();
 
   private final AutosContainer m_autosContainer = new AutosContainer(m_swerveDriveSubsystem, m_telemetrySubsystem, m_shooterSubsystem);
 
@@ -52,8 +54,14 @@ public class RobotContainer {
     m_shooterSubsystem.setDefaultCommand(m_shooterSubsystem.setDutyCycle(0));
 
     m_swerveDriveSubsystem.setDefaultCommand(
-      new DriveWithJoystick(m_swerveDriveSubsystem, m_driverController)
-    );
+  new DriveWithJoystick( //
+    m_swerveDriveSubsystem, 
+    m_driverController, 
+    m_telemetrySubsystem,
+    () -> m_driverController.getHID().getXButton(), //Hub Align, this overrides
+    () -> m_driverController.getHID().getYButton() //Joystick Align
+  ));
+    // 
 
     LimelightHelpers.setupPortForwardingUSB(0);
   }
@@ -75,26 +83,46 @@ public class RobotContainer {
     //     .onTrue(m_climberSubsystem.setPosition(45, false));
 
     // m_driverController.leftTrigger()
-    // .onTrue(m_climberSubsystem.setPosition(10, true));
+    // .onTrue(m_climberSubsystem.setPosition(0, true));
 
-    //m_driverController.a().onTrue(m_climberSubsystem.switchLimitsCommand());
-    //m_driverController.b().onTrue(m_climberSubsystem.setCurrentPosToZeroCommand());
+    // m_driverController.a().onTrue(m_climberSubsystem.switchLimitsCommand());
+    // m_driverController.b().onTrue(m_climberSubsystem.setCurrentPosToZeroCommand());
 
     // m_driverController.x().whileTrue(m_shooterSubsystem.shootSequence(-0.8, 35));
     // m_driverController.y().whileTrue(m_shooterSubsystem.shootSequence(-0.8, 40)); //8 m/s
     // m_driverController.b().whileTrue(m_shooterSubsystem.shootSequence(-0.8, 50));
     // m_driverController.rightTrigger().whileTrue(m_shooterSubsystem.setDutyCycleFeeder(-0.8));
-    m_driverController.rightTrigger().onTrue(m_shooterSubsystem.setVelocity(5));
-    m_driverController.a().onTrue(m_shooterSubsystem.setVelocity(60));
-    m_driverController.b().onTrue(m_shooterSubsystem.setVelocity(40));
-    m_driverController.y().onTrue(m_shooterSubsystem.setVelocity(30));
-    m_driverController.x().onTrue(m_shooterSubsystem.setVelocity(0));
+
+
+    // m_driverController.a().onTrue(m_shooterSubsystem.shootSequence(-0.6, 60));
+    //m_driverController.b().onTrue(m_shooterSubsystem.shootSequence(-0.6, 40));
+    m_driverController.y().onTrue(Commands.deferredProxy(() -> m_shooterSubsystem.shootSequence(-0.9, m_telemetrySubsystem.getRPSForPosition())));
+    m_driverController.b().onTrue(m_shooterSubsystem.setDutyCycle(0));
 
 
     //xButton.onTrue(m_autosContainer.m_moveToTargetL);
-    //yButton.onTrue(m_autosContainer.m_moveToTargetF);
-    //aButton.onTrue(m_autosContainer.m_moveToTargetB);
+    //yButton.onTrue(m_autosContainer.m_moveF);
+    //aButton.onTrue(m_autosContainer.m_moveB);
     //bButton.onTrue(m_autosContainer.m_moveToTargetR);
+
+    // m_driverController.y().onTrue(m_intakeSubsystem.setPosition(0.2));
+    // m_driverController.a().onTrue(m_intakeSubsystem.setPosition(-0.07));
+    // m_driverController.b().onTrue(m_intakeSubsystem.setCurrentPosToZeroCommand());
+
+    // m_driverController.povUp()
+    //     .whileTrue(m_intakeSubsystem.setDutyCycle(0.08));
+
+    // m_driverController.povDown()
+    //     .whileTrue(m_intakeSubsystem.setDutyCycle(-0.08));
+    // }
+
+    // m_driverController.povUp()
+    //     .onTrue(m_shooterSubsystem.runOnce(() -> m_shooterSubsystem.increaseSpeed()));
+
+    // m_driverController.povDown()
+    //     .onTrue(m_shooterSubsystem.runOnce(() -> m_shooterSubsystem.decreaseSpeed()));
+  
+    
   }
 
   public Command getAutonomousCommand() {

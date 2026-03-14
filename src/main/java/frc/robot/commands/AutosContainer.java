@@ -22,7 +22,7 @@ public final class AutosContainer {
   private final ShooterSubsystem m_ShooterSubsystem;
   //public final Command m_simpleAuto, m_findAprilTagAuto, m_moveToTargetF, m_moveToTargetB, m_moveToTargetL, m_moveToTargetR, m_AlignToTag, m_simpleAutoTest;
   public final Command m_simpleAutoTest;
-  public final Command m_test, m_climb, m_shoot;
+  public final Command m_test, m_climb, m_moveF, m_moveB;
   //SendableChooser<Command> m_chooser = new SendableChooser<>();
   private final SendableChooser<Command> m_chooser = new SendableChooser<>();
 
@@ -41,19 +41,27 @@ public final class AutosContainer {
     // m_moveToTargetR = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(4, 11, Rotation2d.fromDegrees(0)));
 
     // m_AlignToTag = new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(4.2, 11, Rotation2d.fromDegrees(0)));
-    m_test = Commands.sequence(
-    Commands.sequence(
-        Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0.4, 0), true), m_swerveDriveSubsystem).withTimeout(2),
-        Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 0.5), false), m_swerveDriveSubsystem).withTimeout(0.4),
-        Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 0), false), m_swerveDriveSubsystem).withTimeout(0.3),
-        m_ShooterSubsystem.setDutyCycle(0.93).withTimeout(5)
-    ));
+    // m_test = Commands.sequence(
+    //   Commands.sequence(
+    //     Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0.4, 0), true), m_swerveDriveSubsystem).withTimeout(2),
+    //     Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 0.5), false), m_swerveDriveSubsystem).withTimeout(0.4),
+    //     Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 0), false), m_swerveDriveSubsystem).withTimeout(0.3),
+    //     m_ShooterSubsystem.setDutyCycle(0.93).withTimeout(5)
+    // ));
+    m_test = Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0.4, 0), true), m_swerveDriveSubsystem).withTimeout(2);
     m_climb = Commands.sequence(Commands.sequence());
-    m_shoot = Commands.sequence(Commands.sequence(
-      Commands.run(() -> new MoveToTargetAuto(swerveDrive, telemetrySubsystem, new Pose2d(2.0,4.034536, Rotation2d.fromDegrees(0))))
-    ));
-    m_chooser.setDefaultOption("Simple Auto", m_test);
-    m_chooser.addOption("FindAprilTagAuto", m_shoot);
+    m_moveB = new MoveToTargetAuto(
+      swerveDrive, 
+      telemetrySubsystem, 
+      new Pose2d(1.2, 3.73, Rotation2d.fromDegrees(180))
+    );
+    m_moveF = new MoveToTargetAuto(
+      swerveDrive, 
+      telemetrySubsystem, 
+      new Pose2d(2.5, 3.73, Rotation2d.fromDegrees(0))
+    );
+    m_chooser.setDefaultOption("move to target", m_moveF);
+    m_chooser.addOption("m_test", m_test);
     //m_chooser.addOption("FindAprilTagAuto", m_findAprilTagAuto);
     //m_chooser.addOption("Align Auto", m_AlignToTag);
     SmartDashboard.putData("Auto Chooser",m_chooser);

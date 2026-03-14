@@ -4,9 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-
+import com.ctre.phoenix6.CANBus;
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -40,9 +41,10 @@ public final class Constants {
 
     public static final int TICKS_PER_REVOLUTION = 4096;
 
-    public static final double DRIVE_SPEED = 0.5; // m/s
-    public static final double ROTATE_SPEED = 1; // rad/s
+    public static final double DRIVE_SPEED = 0.8; // m/s
+    public static final double ROTATE_SPEED = 2; // rad/s
     public static final double WHEEL_RADIUS = 0.051;
+
     public static final String CANbus = "rio";
 
     public static final class AngleMotors{
@@ -58,9 +60,9 @@ public final class Constants {
     }
 
     public static final class DriveMotors{
-      public static final int FRONT_LEFT_ID = 0; 
+      public static final int FRONT_LEFT_ID = 2; 
       public static final int FRONT_RIGHT_ID = 19; 
-      public static final int BACK_LEFT_ID = 2; 
+      public static final int BACK_LEFT_ID = 6; 
       public static final int BACK_RIGHT_ID = 17;
 
       public static final double kP = 0.3;
@@ -79,8 +81,7 @@ public final class Constants {
     public static final int shooter2_ID = 18;
     public static final int feeder_ID = 14;
 
-    public static final double kP = 0.7; 
-    public static final double kI = 0.0;
+    public static final double kP = 1.5; 
     public static final double kV = 0.117;
     public static final double kS = 0.24;
 
@@ -91,17 +92,64 @@ public final class Constants {
     public static final int CLIMBER_ID = 4;
     public static final String CANbus = "rio";
     public static final double MAX_HEIGHT_ROTATIONS = 55;
+    public static final double MIN_HEIGHT_ROTATIONS = 0;
 
-    public static final double kP_Align = 0.5;
+    public static final double kP_Align = 0.7;
     public static final double kG_Align = 0.0;
 
-    public static final double kP_Climb = 0.5;
+    public static final double kP_Climb = 0.7;
     public static final double kG_Climb = 0.01;
+
+    public static final double SUPPLY_CURRENT_LIMIT = 80;
+    public static final double STATOR_CURRENT_LIMIT = 80;
   }
 
-  public static final class AprilTagConstants {
-    public static final double TAG_X = 12.227;
-    public static final double TAG_Y = 4.026;
+  public static final class TelemetryConstants {
+    // (distance (m), velocity (rps))
+    public static final double[][] dataPoints = { //test data
+      {1.74,30},
+      {2.26,32},
+      {2.8,36},
+      {3.75,40},
+    };
+
+    public static final Translation2d BLUE_HUB = new Translation2d(4.626, 4.033);
+    public static final Translation2d RED_HUB = new Translation2d(11.915, 4.033);
+  }
+
+  public static final class IntakeConstants {
+    public static final class PivotConstants{
+      public static final int PIVOT_ID = 0;
+
+      public static final double kP = 20;
+      public static final double kV = 0;
+      public static final double kG = 0.5;
+
+      public static final double SUPPLY_CURRENT_LIMIT = 20;
+      public static final double STATOR_CURRENT_LIMIT = 30;
+
+      public static final double MAX_ROTATIONS = 5;
+      public static final double MIN_ROTATIONS = -5;
+
+      public static final double GEAR_RATIO = 10;
+    }
+
+    public static final class RollerConstants{
+      public static final int ROLLER_ID = 40;
+      public static final double kP = 0;
+      public static final double kV = 0;
+
+      public static final double SUPPLY_CURRENT_LIMIT = 20;
+      public static final double STATOR_CURRENT_LIMIT = 30;
+
+      public static final double MAX_ROTATIONS = 5;
+      public static final double MIN_ROTATIONS = -5;
+
+      public static final double GEAR_RATIO = 10;
+
+    }
+    
+    public static final String CANbus = "rio";
   }
 
   public static final class PigeonConstants {

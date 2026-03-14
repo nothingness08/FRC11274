@@ -33,15 +33,15 @@ public class ClimberSubsystem extends SubsystemBase {
 
     configs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-    configs.CurrentLimits.SupplyCurrentLimit = 80;
+    configs.CurrentLimits.SupplyCurrentLimit = ClimberConstants.SUPPLY_CURRENT_LIMIT;
     configs.CurrentLimits.SupplyCurrentLimitEnable = true;
     
-    configs.CurrentLimits.StatorCurrentLimit = 80;
+    configs.CurrentLimits.StatorCurrentLimit = ClimberConstants.STATOR_CURRENT_LIMIT;
     configs.CurrentLimits.StatorCurrentLimitEnable = true;
 
     configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = ClimberConstants.MAX_HEIGHT_ROTATIONS;
     configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
+    configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = ClimberConstants.MIN_HEIGHT_ROTATIONS;
     configs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     m_climber.getConfigurator().apply(configs);
@@ -91,7 +91,7 @@ public class ClimberSubsystem extends SubsystemBase {
     return run(() -> m_climber.setControl(new PositionVoltage(rotations).withSlot(slot)))
         .until(() -> {
             double currentPosition = m_climber.getPosition().refresh().getValueAsDouble();
-            return Math.abs(currentPosition - rotations) < 1.5;
+            return Math.abs(currentPosition - rotations) < 1;
         })
         .finallyDo(() -> {
             // Optional: Stop the motor or switch to a neutral mode when finished

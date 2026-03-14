@@ -14,28 +14,21 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.*;
 
-/** An example command that uses an example subsystem. */
 public class MoveToTargetAuto extends Command {
   private final SwerveDriveSubsystem m_swerveDrive;
   private final TelemetrySubsystem m_telemetrySubsystem;
   private final Pose2d targetPos;
 
-  private final ProfiledPIDController thetaController = 
-    new ProfiledPIDController(1.5, 0.01, 0.01, 
-        new TrapezoidProfile.Constraints(6.28, 3.14));
+  private final TrapezoidProfile.Constraints linearConstraints = 
+      new TrapezoidProfile.Constraints(3.0, 1.5);
+  
+  private final TrapezoidProfile.Constraints thetaConstraints = 
+      new TrapezoidProfile.Constraints(6.28, 3.14);
 
-  private final HolonomicDriveController holonomicController = 
-    new HolonomicDriveController(
-      new PIDController(1.1, 0, 0.005),
-      new PIDController(1.1, 0, 0.005),
-      thetaController
-    );
-  /*
-  *
-   * Creates a new ExampleCommand.
-   *
-   * @param m_swerveDrive The subsystem used by this command.
-   */
+  private final ProfiledPIDController xController = new ProfiledPIDController(6, 0, 0, linearConstraints);
+  private final ProfiledPIDController yController = new ProfiledPIDController(6, 0, 0, linearConstraints);
+  private final ProfiledPIDController thetaController = new ProfiledPIDController(5, 0, 0, thetaConstraints);
+
   public MoveToTargetAuto(SwerveDriveSubsystem swerveDrive, TelemetrySubsystem telemetrySubsystem, Pose2d targetPos) {
     m_swerveDrive = swerveDrive;
     this.targetPos = targetPos;
@@ -45,27 +38,35 @@ public class MoveToTargetAuto extends Command {
     addRequirements(m_swerveDrive);
   }
 
-  // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    Pose2d currentPose = m_telemetrySubsystem.getPose();
+    xController.reset(currentPose.getX());
+    yController.reset(currentPose.getY());
+    thetaController.reset(currentPose.getRotation().getRadians());
   }
 
-  // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     Pose2d currentPose = m_telemetrySubsystem.getPose();
 
-    if(m_telemetrySubsystem.getLimelightTV()){
-      ChassisSpeeds speeds = holonomicController.calculate(
-          currentPose, 
-          targetPos, 
-          0, 
-          targetPos.getRotation()
-      );
-      m_swerveDrive.drive(speeds, false);
-    } else {
-      m_swerveDrive.drive(new ChassisSpeeds(0, 0, 0), true);
-    }
+    // 4. Calculate required velocities for each axis independently
+    double xVelocity = xController.calculate(currentPose.getX(), targetPos.getX());
+    double yVelocity = yController.calculate(currentPose.getY(), targetPos.getY());
+    System.out.println("current x: " + currentPose.getX() + " target x: " + targetPos.getX());
+    System.out.println("current y: " + currentPose.getY() + " target y: " + targetPos.getY());
+
+    System.out.println("x:" + xVelocity + " y: " + yVelocity);
+    double thetaVelocity = thetaController.calculate(
+        currentPose.getRotation().getRadians(), 
+        targetPos.getRotation().getRadians()
+    );
+
+    // 5. Drive using field-relative speeds
+    m_swerveDrive.drive(
+         new ChassisSpeeds(-yVelocity, xVelocity, -thetaVelocity), 
+        true
+    );
   }
 
   // Called once the command ends or is interrupted.
@@ -83,6 +84,6 @@ public class MoveToTargetAuto extends Command {
     double rotationDist = Math.abs(currentPose.getRotation().minus(targetPos.getRotation()).getDegrees());
 
     
-    return translationDist < 0.05 && rotationDist < 4.0;
+    return translationDist < 0.05 && rotationDist < 5.0;
   }
 }
