@@ -51,7 +51,7 @@ public final class Constants {
       public static final int FRONT_LEFT_ID = 1; 
       public static final int FRONT_RIGHT_ID = 15; 
       public static final int BACK_LEFT_ID = 3; 
-      public static final int BACK_RIGHT_ID = 16;
+      public static final int BACK_RIGHT_ID = 14;
 
       public static final double kF = 0.0;
       public static final double kP = 1.1;
@@ -61,7 +61,7 @@ public final class Constants {
 
     public static final class DriveMotors{
       public static final int FRONT_LEFT_ID = 2; 
-      public static final int FRONT_RIGHT_ID = 19; 
+      public static final int FRONT_RIGHT_ID = 16; 
       public static final int BACK_LEFT_ID = 6; 
       public static final int BACK_RIGHT_ID = 17;
 
@@ -79,7 +79,7 @@ public final class Constants {
     public static final String CANbus = "rio";
     public static final int shooter_ID = 5; 
     public static final int shooter2_ID = 18;
-    public static final int feeder_ID = 14;
+    public static final int feeder_ID = 13;
 
     public static final double kP = 1.5; 
     public static final double kV = 0.117;
@@ -135,7 +135,7 @@ public final class Constants {
     }
 
     public static final class RollerConstants{
-      public static final int ROLLER_ID = 40;
+      public static final int ROLLER_ID = 19;
       public static final double kP = 0;
       public static final double kV = 0;
 

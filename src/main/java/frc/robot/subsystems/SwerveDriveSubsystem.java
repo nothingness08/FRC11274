@@ -128,7 +128,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
     else{
       return Math.toDegrees(Math.atan(velocities[1]/velocities[0]));
-    } 
+    }
   }
 
   private double[] offsetByAngle(double[] velocities, double angle){
