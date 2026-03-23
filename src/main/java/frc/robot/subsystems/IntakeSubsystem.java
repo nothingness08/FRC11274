@@ -52,6 +52,7 @@ public class IntakeSubsystem extends SubsystemBase {
     pivotConfigs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     this.setDefaultCommand(moveToPosition());
+    m_pivot.setPosition(IntakeConstants.PivotConstants.INITIALIZE_ROTATIONS);
     targetRotation = getPivotPosition();
     m_pivot.getConfigurator().apply(pivotConfigs);
 
@@ -64,10 +65,10 @@ public class IntakeSubsystem extends SubsystemBase {
     rollerConfigs.Voltage.PeakForwardVoltage = 11.0;
     rollerConfigs.Voltage.PeakReverseVoltage = -11.0;
     
-    rollerConfigs.CurrentLimits.SupplyCurrentLimit = 30;
+    rollerConfigs.CurrentLimits.SupplyCurrentLimit = IntakeConstants.RollerConstants.SUPPLY_CURRENT_LIMIT;
     rollerConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
     
-    rollerConfigs.CurrentLimits.StatorCurrentLimit = 30;
+    rollerConfigs.CurrentLimits.StatorCurrentLimit = IntakeConstants.RollerConstants.STATOR_CURRENT_LIMIT;
     rollerConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
 
     m_roller.getConfigurator().apply(rollerConfigs);
@@ -106,7 +107,7 @@ public class IntakeSubsystem extends SubsystemBase {
         m_pivot.setControl(new PositionVoltage(rotations).withSlot(0));
         System.out.println("Distance to target: " + (getPivotPosition() - rotations));
     })
-    .until(() -> Math.abs(getPivotPosition() - rotations) < 0.01);
+    .until(() -> Math.abs(getPivotPosition() - rotations) < 0.005);
 } 
 
   public double getPivotPosition() {
@@ -128,6 +129,14 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public void stopRoller() {
     m_roller.setControl(new DutyCycleOut(0));
+  }
+  
+  public Command deployAndRun() {
+    return setPosition(IntakeConstants.PivotConstants.DEPLOY_ROTATIONS)
+        .andThen(run(() -> m_roller.setControl(new DutyCycleOut(IntakeConstants.RollerConstants.INTAKE_SPEED))))
+        .finallyDo(() -> {
+            stopRoller();
+        });
   }
 
   @Override

@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.*;
 
@@ -20,7 +21,7 @@ public class MoveToTargetAuto extends Command {
   private final Pose2d targetPos;
 
   private final TrapezoidProfile.Constraints linearConstraints = 
-      new TrapezoidProfile.Constraints(3.0, 1.5);
+      new TrapezoidProfile.Constraints(4.0, 2);
   
   private final TrapezoidProfile.Constraints thetaConstraints = 
       new TrapezoidProfile.Constraints(6.28, 3.14);
@@ -53,20 +54,28 @@ public class MoveToTargetAuto extends Command {
     // 4. Calculate required velocities for each axis independently
     double xVelocity = xController.calculate(currentPose.getX(), targetPos.getX());
     double yVelocity = yController.calculate(currentPose.getY(), targetPos.getY());
-    System.out.println("current x: " + currentPose.getX() + " target x: " + targetPos.getX());
-    System.out.println("current y: " + currentPose.getY() + " target y: " + targetPos.getY());
+    //System.out.println("current x: " + currentPose.getX() + " target x: " + targetPos.getX());
+    //System.out.println("current y: " + currentPose.getY() + " target y: " + targetPos.getY());
 
-    System.out.println("x:" + xVelocity + " y: " + yVelocity);
+    //System.out.println("x:" + xVelocity + " y: " + yVelocity);
     double thetaVelocity = thetaController.calculate(
         currentPose.getRotation().getRadians(), 
         targetPos.getRotation().getRadians()
     );
 
-    // 5. Drive using field-relative speeds
-    m_swerveDrive.drive(
+    if(m_telemetrySubsystem.getAlliance() == DriverStation.Alliance.Blue){
+      m_swerveDrive.drive(
          new ChassisSpeeds(-yVelocity, xVelocity, -thetaVelocity), 
         true
-    );
+      );
+    }
+    else{
+      m_swerveDrive.drive(
+         new ChassisSpeeds(yVelocity, -xVelocity, -thetaVelocity), 
+        true
+      );
+    }
+    
   }
 
   // Called once the command ends or is interrupted.

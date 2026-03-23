@@ -41,8 +41,8 @@ public final class Constants {
 
     public static final int TICKS_PER_REVOLUTION = 4096;
 
-    public static final double DRIVE_SPEED = 0.8; // m/s
-    public static final double ROTATE_SPEED = 2; // rad/s
+    public static final double DRIVE_SPEED = 4.5; // m/s
+    public static final double ROTATE_SPEED = 6; // rad/s
     public static final double WHEEL_RADIUS = 0.051;
 
     public static final String CANbus = "rio";
@@ -57,6 +57,9 @@ public final class Constants {
       public static final double kP = 1.1;
       public static final double kI = 0.0;
       public static final double kD = 0.02;
+
+      public static final double CONTINUOUS_CURRENT_LIMIT = 25;
+      public static final double PEAK_CURRENT_LIMIT = 40;
     }
 
     public static final class DriveMotors{
@@ -72,6 +75,9 @@ public final class Constants {
       public static final double kS = 0.0;
 
       public static final double GEAR_RATIO = 0.2;
+
+      public static final double SUPPLY_CURRENT_LIMIT = 60;
+      public static final double STATOR_CURRENT_LIMIT = 60;
     }
   }
 
@@ -81,24 +87,29 @@ public final class Constants {
     public static final int shooter2_ID = 18;
     public static final int feeder_ID = 13;
 
-    public static final double kP = 1.5; 
-    public static final double kV = 0.117;
-    public static final double kS = 0.24;
+    public static final double kP = 0.3; //1.2
+    public static final double kV = 0.12345;
+    public static final double kS = 0.0; //0.24
 
     public static final double GEAR_RATIO = 1.5;
+
+    public static final double SUPPLY_CURRENT_LIMIT = 60;
+    public static final double STATOR_CURRENT_LIMIT = 60;
+
+    public static final double FEEDER_SPEED = -0.8;
   }
 
   public static final class ClimberConstants{
     public static final int CLIMBER_ID = 4;
     public static final String CANbus = "rio";
-    public static final double MAX_HEIGHT_ROTATIONS = 55;
+    public static final double MAX_HEIGHT_ROTATIONS = 60;
     public static final double MIN_HEIGHT_ROTATIONS = 0;
 
     public static final double kP_Align = 0.7;
     public static final double kG_Align = 0.0;
 
-    public static final double kP_Climb = 0.7;
-    public static final double kG_Climb = 0.01;
+    public static final double kP_Climb = 1;
+    public static final double kG_Climb = 0.015;
 
     public static final double SUPPLY_CURRENT_LIMIT = 80;
     public static final double STATOR_CURRENT_LIMIT = 80;
@@ -107,10 +118,12 @@ public final class Constants {
   public static final class TelemetryConstants {
     // (distance (m), velocity (rps))
     public static final double[][] dataPoints = { //test data
-      {1.74,30},
-      {2.26,32},
+      {1.24,31},
+      {1.94,33},
+      {2.28,34.5},
       {2.8,36},
-      {3.75,40},
+      {3.17,39.5},
+      {3.75,42},
     };
 
     public static final Translation2d BLUE_HUB = new Translation2d(4.626, 4.033);
@@ -121,17 +134,22 @@ public final class Constants {
     public static final class PivotConstants{
       public static final int PIVOT_ID = 0;
 
-      public static final double kP = 20;
+      public static final double kP = 10;
       public static final double kV = 0;
       public static final double kG = 0.5;
 
-      public static final double SUPPLY_CURRENT_LIMIT = 20;
-      public static final double STATOR_CURRENT_LIMIT = 30;
+      public static final double SUPPLY_CURRENT_LIMIT = 100;
+      public static final double STATOR_CURRENT_LIMIT = 100;
 
-      public static final double MAX_ROTATIONS = 5;
-      public static final double MIN_ROTATIONS = -5;
+      public static final double MAX_ROTATIONS = -0.02;
+      public static final double MIN_ROTATIONS = -0.6;
 
-      public static final double GEAR_RATIO = 10;
+      public static final 
+      double GEAR_RATIO = 10;
+
+      public static final double DEPLOY_ROTATIONS = -0.41;
+      public static final double RETRACT_ROTATIONS = -0.02;
+      public static final double INITIALIZE_ROTATIONS = 0;
     }
 
     public static final class RollerConstants{
@@ -139,13 +157,12 @@ public final class Constants {
       public static final double kP = 0;
       public static final double kV = 0;
 
-      public static final double SUPPLY_CURRENT_LIMIT = 20;
-      public static final double STATOR_CURRENT_LIMIT = 30;
-
-      public static final double MAX_ROTATIONS = 5;
-      public static final double MIN_ROTATIONS = -5;
+      public static final double SUPPLY_CURRENT_LIMIT = 50;
+      public static final double STATOR_CURRENT_LIMIT = 50;
 
       public static final double GEAR_RATIO = 10;
+
+      public static final double INTAKE_SPEED = 0.7;
 
     }
     

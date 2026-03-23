@@ -7,7 +7,9 @@ package frc.robot.commands;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
@@ -57,11 +59,17 @@ public class DriveWithJoystick extends Command {
     rot = Math.abs(rot) > OIConstants.CONTROLLER_DEADBAND ? rot : 0.0;
     xSpeed *= (1/(mag));
     ySpeed *= (1/(mag));
-    if(alignToJoystick.getAsBoolean()){
-      //rot = -pidController.calculate(m_telemetrySubsystem.getPose().getRotation().getDegrees(), Math.atan2(m_controller.getRightY(), m_controller.getRightX()));
+    if(alignToJoystick.getAsBoolean()){ //do this later
+      //rot = -pidController.calculate(m_telemetrySubsystem.getPose().getRotation().getDegrees(), (m_telemetrySubsystem.getPose().getRotation().getDegrees() % 360) + Math.atan2(m_controller.getRightY(), m_controller.getRightX()));
     }
-    if(alignToHub.getAsBoolean()){ //align to hub
-      rot = -pidController.calculate(m_telemetrySubsystem.getPose().getRotation().getDegrees(), m_telemetrySubsystem.targetRotation().getDegrees());
+    if(alignToHub.getAsBoolean()){
+      double currentDeg = m_telemetrySubsystem.getPose().getRotation().getDegrees();
+      double targetDeg  = m_telemetrySubsystem.targetRotationToHub().getDegrees();
+      
+      double error = targetDeg - currentDeg;
+      error = Math.IEEEremainder(error, 360.0);
+      
+      rot = -pidController.calculate(0, error);
     }
     
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(

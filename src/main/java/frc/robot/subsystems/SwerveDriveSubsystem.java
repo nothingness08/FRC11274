@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
@@ -21,6 +22,8 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimberConstants;
+import frc.robot.Constants.IntakeConstants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.SwerveDriveConstants;
 
 public class SwerveDriveSubsystem extends SubsystemBase {
@@ -92,6 +95,14 @@ public class SwerveDriveSubsystem extends SubsystemBase {
       angleMotor.config_kI(0, SwerveDriveConstants.AngleMotors.kI, 10);
       angleMotor.config_kD(0, SwerveDriveConstants.AngleMotors.kD, 10);
       
+      SupplyCurrentLimitConfiguration swerveLimit = new SupplyCurrentLimitConfiguration(
+          true,   // Enabled
+          SwerveDriveConstants.AngleMotors.CONTINUOUS_CURRENT_LIMIT,     // 25A Continuous
+          SwerveDriveConstants.AngleMotors.PEAK_CURRENT_LIMIT,     // 40A Peak
+          0.1     // 100ms Duration
+      );
+
+      angleMotor.configSupplyCurrentLimit(swerveLimit);
       int currentTick = angleMotor.getSensorCollection().getPulseWidthPosition() & 0xFFF;
       angleMotor.setSelectedSensorPosition(currentTick - SwerveDriveConstants.ANGLE_OFFSETS_TICKS[i]); 
       i++;
@@ -107,6 +118,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
       configs.Slot0.kS = SwerveDriveConstants.DriveMotors.kS;
       
       configs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+      configs.CurrentLimits.SupplyCurrentLimit = SwerveDriveConstants.DriveMotors.SUPPLY_CURRENT_LIMIT;
+      configs.CurrentLimits.SupplyCurrentLimitEnable = true;
+      
+      configs.CurrentLimits.StatorCurrentLimit = SwerveDriveConstants.DriveMotors.STATOR_CURRENT_LIMIT;
+      configs.CurrentLimits.StatorCurrentLimitEnable = true;
 
       driveMotor.getConfigurator().apply(configs);
       driveMotor.getVelocity().setUpdateFrequency(50);
@@ -190,6 +207,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     //   newRotationVelocity = (-1* rotationController.calculate(m_pigeon.getYaw(), lastRotation));
     // }
     // newSpeeds = new ChassisSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, newRotationVelocity);
+    // ChassisSpeeds orientatedSpeeds;
+    // if(m_telemetrySubsystem.getAlliance() == DriverStation.Alliance.Blue && isAuto){
+    //   orientatedSpeeds = new ChassisSpeeds(-speeds.yVelocity)
+    //   //new ChassisSpeeds(-yVelocity, xVelocity, -thetaVelocity)
+    // }
     double [][] velocitiesAndAngles = getVelocitiesAngles(ChassisSpeeds.discretize(speeds, 0.02), fieldRelative);
     for(int i = 0; i < 4; i++) {
       double targetVelocity =  velocitiesAndAngles[i][0]; //(m/s)

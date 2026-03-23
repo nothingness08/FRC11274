@@ -30,7 +30,7 @@ public class ShooterSubsystem extends SubsystemBase {
   private final TalonFX m_feeder = new TalonFX(ShooterConstants.feeder_ID, ShooterConstants.CANbus);
   Follower toFollowLeader = new Follower(m_shooter.getDeviceID(), MotorAlignmentValue.Opposed);
 
-  public double shooterRPS = 30;
+  public double shooterRPSTest = 30;
 
   public ShooterSubsystem() {
     TalonFXConfiguration configs = new TalonFXConfiguration();
@@ -44,10 +44,10 @@ public class ShooterSubsystem extends SubsystemBase {
     configs.Voltage.PeakForwardVoltage = 11.0;
     configs.Voltage.PeakReverseVoltage = -11.0;
     
-    configs.CurrentLimits.SupplyCurrentLimit = 60;
+    configs.CurrentLimits.SupplyCurrentLimit = ShooterConstants.SUPPLY_CURRENT_LIMIT;
     configs.CurrentLimits.SupplyCurrentLimitEnable = true;
     
-    configs.CurrentLimits.StatorCurrentLimit = 60;
+    configs.CurrentLimits.StatorCurrentLimit = ShooterConstants.STATOR_CURRENT_LIMIT;
     configs.CurrentLimits.StatorCurrentLimitEnable = true;
 
     m_shooter.getConfigurator().apply(configs);
@@ -88,7 +88,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public boolean atSetpoint(double targetRPS) {
-    return Math.abs(getVelocity() - targetRPS) < 3.0; 
+    return Math.abs(getVelocity() - targetRPS) < 1.0; 
   }
 
   public Command shootSequence(double feederPercent, double shooterRPS) {
@@ -108,15 +108,15 @@ public class ShooterSubsystem extends SubsystemBase {
     });
   }
 
-  // public void increaseSpeed(){
-  //   shooterRPS++;
-  // }
-  // public void decreaseSpeed(){
-  //   shooterRPS--;
-  // }
+  public void increaseSpeed(){
+    shooterRPSTest+= 0.5;
+  }
+  public void decreaseSpeed(){
+    shooterRPSTest-=0.5;
+  }
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Target RPS", shooterRPS);
+    SmartDashboard.putNumber("Target RPS", shooterRPSTest);
     SmartDashboard.putNumber("Flywheel RPS", getVelocity());
   }
 

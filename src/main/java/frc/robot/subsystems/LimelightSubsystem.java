@@ -10,7 +10,7 @@ import frc.robot.libs.LimelightHelpers;
 
 public class LimelightSubsystem extends SubsystemBase {
   private final String LIMELIGHT_NAME; 
-
+  
   public LimelightSubsystem(String name) {
     LIMELIGHT_NAME = name;
     LimelightHelpers.setPipelineIndex(LIMELIGHT_NAME, 0);
@@ -25,6 +25,7 @@ public class LimelightSubsystem extends SubsystemBase {
           180    
       );
     }
+    LimelightHelpers.setupPortForwardingUSB(0);
   }
 
   public String getLimelightName(){

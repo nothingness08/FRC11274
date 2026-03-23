@@ -39,10 +39,10 @@ public class ClimberSubsystem extends SubsystemBase {
     configs.CurrentLimits.StatorCurrentLimit = ClimberConstants.STATOR_CURRENT_LIMIT;
     configs.CurrentLimits.StatorCurrentLimitEnable = true;
 
-    configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = ClimberConstants.MAX_HEIGHT_ROTATIONS;
-    configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = ClimberConstants.MIN_HEIGHT_ROTATIONS;
-    configs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+    // configs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = ClimberConstants.MAX_HEIGHT_ROTATIONS;
+    // configs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    // configs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = ClimberConstants.MIN_HEIGHT_ROTATIONS;
+    // configs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     m_climber.getConfigurator().apply(configs);
 

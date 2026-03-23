@@ -10,11 +10,14 @@ package frc.robot.subsystems;
 // import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveDriveConstants;
@@ -28,6 +31,8 @@ public class TelemetrySubsystem extends SubsystemBase {
   private SwerveDriveSubsystem m_swerveDriveSubsystem;
   private InterpolatingDoubleTreeMap interpolatingDoubleTreeMap = new InterpolatingDoubleTreeMap();
 
+  final Field2d field = new Field2d();
+private final PIDController pidController = new PIDController(0.07, 0, 0);
   public TelemetrySubsystem(SwerveDriveSubsystem swerveDriveSubsystem, Pigeon pigeon, LimelightSubsystem limelight) {
     m_swerveDriveSubsystem = swerveDriveSubsystem;
     m_pigeon = pigeon;
@@ -38,10 +43,22 @@ public class TelemetrySubsystem extends SubsystemBase {
       m_swerveDriveSubsystem.getModulePositions(),
       new Pose2d(0.0,0.0, Rotation2d.fromDegrees(0.0))
     );
+    var alliance = DriverStation.getAlliance();
+    if (alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red) {
+      // Mirror the starting pose to the red side
+      // Field is 16.54m long, so red origin X ≈ 16.54 - 0.0
+      resetPose(new Pose2d(
+          16.54,  // red side X (field width in meters)
+          8.02,   // mid-field Y, adjust to your actual starting position
+          Rotation2d.fromDegrees(180.0) // facing blue hub from red side
+      ));
+    }
 
     for(double[] pair : TelemetryConstants.dataPoints){
       interpolatingDoubleTreeMap.put(pair[0], pair[1]);
     }
+
+    SmartDashboard.putData(field);
     // RobotConfig config;
     // try {
     //   config = RobotConfig.fromGUISettings();
@@ -103,31 +120,70 @@ public class TelemetrySubsystem extends SubsystemBase {
 
   public double getRPSForPosition(){
     Translation2d currentPosition = getPose().getTranslation();
-    double distance = currentPosition.getDistance(TelemetryConstants.BLUE_HUB);
+    double distance;
+    if(getAlliance() == DriverStation.Alliance.Blue){
+      distance = currentPosition.getDistance(TelemetryConstants.BLUE_HUB);
+    }
+    else{
+      distance = currentPosition.getDistance(TelemetryConstants.RED_HUB);
+    }
     return interpolatingDoubleTreeMap.get(distance);
   }
 
-  public Rotation2d targetRotation(){
+  public Rotation2d targetRotationToHub(){
     Pose2d robotPos = getPose();
-    double deltaX = TelemetryConstants.BLUE_HUB.getX() - robotPos.getX();
-    double deltaY = TelemetryConstants.BLUE_HUB.getY() - robotPos.getY();
+    double deltaX, deltaY;
+    if(getAlliance() == DriverStation.Alliance.Blue){
+      deltaX = TelemetryConstants.BLUE_HUB.getX() - robotPos.getX();
+      deltaY = TelemetryConstants.BLUE_HUB.getY() - robotPos.getY();
+    }
+    else{
+      deltaX = TelemetryConstants.RED_HUB.getX() - robotPos.getX();
+      deltaY = TelemetryConstants.RED_HUB.getY() - robotPos.getY();
+    }
+    
 
     double angleRadians = Math.atan2(deltaY, deltaX);
     Rotation2d rot = Rotation2d.fromRadians(angleRadians);
+
+    var alliance = DriverStation.getAlliance();
+    if(alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red && angleRadians < 0) {
+      rot = Rotation2d.fromRadians(angleRadians);
+    }
+    else if(alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red && angleRadians > 0){
+      rot = Rotation2d.fromRadians(angleRadians);
+    }
 
     return rot;
   }
 
   public double getDistance(){
     Pose2d robotPos = getPose();
-    double deltaX = TelemetryConstants.BLUE_HUB.getX() - robotPos.getX();
-    double deltaY = TelemetryConstants.BLUE_HUB.getY() - robotPos.getY();
+    double deltaX, deltaY;
+    if(getAlliance() == DriverStation.Alliance.Blue){
+      deltaX = TelemetryConstants.BLUE_HUB.getX() - robotPos.getX();
+      deltaY = TelemetryConstants.BLUE_HUB.getY() - robotPos.getY();
+    }
+    else{   
+      deltaX = TelemetryConstants.RED_HUB.getX() - robotPos.getX();
+      deltaY = TelemetryConstants.RED_HUB.getY() - robotPos.getY();
+    }
 
     return Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
   }
 
+  public DriverStation.Alliance getAlliance() {
+    var alliance = DriverStation.getAlliance();
+    if (alliance.isPresent()) {
+      return alliance.get();
+    }
+    return DriverStation.Alliance.Blue;
+  }
+
   @Override
   public void periodic() {
+    field.setRobotPose(getPose());
+
     m_poseEstimator.update(
       Rotation2d.fromDegrees(m_pigeon.getYaw()),
       m_swerveDriveSubsystem.getModulePositions()
@@ -160,7 +216,15 @@ public class TelemetrySubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Estimated X in", poseEstimate.getX()*39.37);
     SmartDashboard.putNumber("Estimated Y in", poseEstimate.getY()*39.37);
 
-    SmartDashboard.putNumber("rot to hub", targetRotation().getDegrees());
+    SmartDashboard.putNumber("rot to hub", targetRotationToHub().getDegrees());
     SmartDashboard.putNumber("distance to hub", getDistance());
+    SmartDashboard.putNumber("Pigean rot", m_pigeon.getYaw());
+    double currentDeg = getPose().getRotation().getDegrees();
+      double targetDeg = targetRotationToHub().getDegrees();
+      
+      double error = targetDeg - currentDeg;
+      error = Math.IEEEremainder(error, 360.0);
+      
+    SmartDashboard.putNumber("Testing rot", -pidController.calculate(0, error));
   }
 }
