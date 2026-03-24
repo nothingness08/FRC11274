@@ -18,12 +18,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.ClimberConstants;
-import frc.robot.Constants.IntakeConstants;
-import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.SwerveDriveConstants;
 
 public class SwerveDriveSubsystem extends SubsystemBase {
@@ -135,17 +130,18 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   private double distanceBetweenAngles(double a1, double a2){
     return Math.abs((Math.abs(a1 - a2 + 180) % 360) - 180);
   }
-  private double findAngles(double[] velocities){
-    if(velocities[0] < 0){
-      if(velocities[1] < 0){
-        return Math.toDegrees(Math.atan(velocities[1]/velocities[0])) - 180;
-      } else{
-        return Math.toDegrees(Math.atan(velocities[1]/velocities[0])) + 180;
-      }
-    }
-    else{
-      return Math.toDegrees(Math.atan(velocities[1]/velocities[0]));
-    }
+  public double findAngles(double[] velocities){
+    return Math.toDegrees(Math.atan2(velocities[1], velocities[0]));
+    // if(velocities[0] < 0){
+    //   if(velocities[1] < 0){
+    //     return Math.toDegrees(Math.atan(velocities[1]/velocities[0])) - 180;
+    //   } else{
+    //     return Math.toDegrees(Math.atan(velocities[1]/velocities[0])) + 180;
+    //   }
+    // }
+    // else{
+    //   return Math.toDegrees(Math.atan(velocities[1]/velocities[0]));
+    // }
   }
 
   private double[] offsetByAngle(double[] velocities, double angle){

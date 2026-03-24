@@ -35,6 +35,7 @@ public class DriveWithJoystick extends Command {
     this.alignToHub = alignToHub;
     this.alignToJoystick = alignToJoystick;
     addRequirements(m_swerveDrive);
+    pidController.enableContinuousInput(-180, 180);
   }
 
   // Called when the command is initially scheduled.
@@ -59,17 +60,18 @@ public class DriveWithJoystick extends Command {
     rot = Math.abs(rot) > OIConstants.CONTROLLER_DEADBAND ? rot : 0.0;
     xSpeed *= (1/(mag));
     ySpeed *= (1/(mag));
-    if(alignToJoystick.getAsBoolean()){ //do this later
-      //rot = -pidController.calculate(m_telemetrySubsystem.getPose().getRotation().getDegrees(), (m_telemetrySubsystem.getPose().getRotation().getDegrees() % 360) + Math.atan2(m_controller.getRightY(), m_controller.getRightX()));
+    if (alignToJoystick.getAsBoolean()) { 
+      double joystickAngle = m_swerveDrive.findAngles(new double[] {xSpeed, ySpeed}); 
+      double targetHeading = joystickAngle - 90;
+
+      double currentHeading = m_telemetrySubsystem.getPose().getRotation().getDegrees();
+
+      rot = pidController.calculate(currentHeading, targetHeading);
     }
     if(alignToHub.getAsBoolean()){
       double currentDeg = m_telemetrySubsystem.getPose().getRotation().getDegrees();
       double targetDeg  = m_telemetrySubsystem.targetRotationToHub().getDegrees();
-      
-      double error = targetDeg - currentDeg;
-      error = Math.IEEEremainder(error, 360.0);
-      
-      rot = -pidController.calculate(0, error);
+      rot = pidController.calculate(currentDeg, targetDeg);
     }
     
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
