@@ -163,7 +163,7 @@ public final class Constants {
 
       public static final double GEAR_RATIO = 10;
 
-      public static final double INTAKE_SPEED = 0.7;
+      public static final double INTAKE_SPEED = 0.85  ;
 
     }
     
