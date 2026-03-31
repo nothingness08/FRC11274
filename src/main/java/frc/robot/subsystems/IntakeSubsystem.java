@@ -122,13 +122,13 @@ public class IntakeSubsystem extends SubsystemBase {
     return runOnce(() -> setCurrentPosToZero());
   }
 
-  public Command setRollerDutyCycle(double dutycycle) {
-      return run(() -> m_roller.setControl(new DutyCycleOut(dutycycle)))
-        .finallyDo(() -> stopRoller()); 
+  public Command setRollerVelocity(double velocityRPS) {
+    return run(() -> m_roller.setControl(new VelocityVoltage(velocityRPS)))
+        .finallyDo(() -> stopRoller());
   }
 
   public void stopRoller() {
-    m_roller.setControl(new DutyCycleOut(0));
+      m_roller.setControl(new VelocityVoltage(0));
   }
   
   public Command deployAndRun() {

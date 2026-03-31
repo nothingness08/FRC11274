@@ -30,10 +30,13 @@ public class MoveToTargetAuto extends Command {
   private final ProfiledPIDController yController = new ProfiledPIDController(6, 0, 0, linearConstraints);
   private final ProfiledPIDController thetaController = new ProfiledPIDController(5, 0, 0, thetaConstraints);
 
-  public MoveToTargetAuto(SwerveDriveSubsystem swerveDrive, TelemetrySubsystem telemetrySubsystem, Pose2d targetPos) {
+  public MoveToTargetAuto(SwerveDriveSubsystem swerveDrive, TelemetrySubsystem telemetrySubsystem, Pose2d targetPos, double kP, double vmax, double amax) {
     m_swerveDrive = swerveDrive;
     this.targetPos = targetPos;
     m_telemetrySubsystem = telemetrySubsystem;
+    linearConstraints = new TrapezoidProfile.Constraints(kmax, vmax);
+    xController = new ProfiledPIDController(kP, 0, 0, linearConstraints);
+    yController = new ProfiledPIDController(kP, 0, 0, linearConstraints);
 
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
     addRequirements(m_swerveDrive);
