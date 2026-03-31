@@ -41,8 +41,8 @@ public final class Constants {
 
     public static final int TICKS_PER_REVOLUTION = 4096;
 
-    public static final double DRIVE_SPEED = 4.5; // m/s
-    public static final double ROTATE_SPEED = 6; // rad/s
+    public static final double DRIVE_SPEED = 3; // m/s DRIVE SPEED
+    public static final double ROTATE_SPEED = 4; // rad/s ROTATE SPEED
     public static final double WHEEL_RADIUS = 0.051;
 
     public static final String CANbus = "rio";
@@ -87,7 +87,7 @@ public final class Constants {
     public static final int shooter2_ID = 18;
     public static final int feeder_ID = 13;
 
-    public static final double kP = 0.3; //1.2
+    public static final double kP = 0.5; //1.2
     public static final double kV = 0.12345;
     public static final double kS = 0.0; //0.24
 
@@ -134,10 +134,11 @@ public final class Constants {
     public static final class PivotConstants{
       public static final int PIVOT_ID = 0;
 
-      public static final double kP = 10;
+      public static final double kP_Up = 12;
       public static final double kV = 0;
       public static final double kG = 0.5;
 
+      public static final double kP_Down = 6;
       public static final double SUPPLY_CURRENT_LIMIT = 100;
       public static final double STATOR_CURRENT_LIMIT = 100;
 
@@ -147,8 +148,8 @@ public final class Constants {
       public static final 
       double GEAR_RATIO = 10;
 
-      public static final double DEPLOY_ROTATIONS = -0.41;
-      public static final double RETRACT_ROTATIONS = -0.02;
+      public static final double DEPLOY_ROTATIONS = -0.418;
+      public static final double RETRACT_ROTATIONS = -0.04;
       public static final double INITIALIZE_ROTATIONS = 0;
     }
 

@@ -61,7 +61,7 @@ public class RobotContainer {
     m_swerveDriveSubsystem, 
     m_driverController, 
     m_telemetrySubsystem,
-    () -> m_driverController.getHID().getXButton() || edu.wpi.first.wpilibj.DriverStation.isAutonomous(), //Hub Align, this overrides
+    () -> m_driverController.getHID().getXButton(), //Hub Align, this overrides
     () -> m_driverController.getHID().getYButton() //Joystick Align
   ));
     // 
@@ -76,65 +76,76 @@ public class RobotContainer {
     // m_driverController.povDown()
     //     .whileTrue(m_climberSubsystem.setDutyCycle(-0.3));
 
-    m_driverController.rightBumper()
-        .onTrue(m_climberSubsystem.setPosition(58, false));
+    //CLIMBING
+    // m_driverController.rightBumper()
+    //     .onTrue(m_climberSubsystem.setPosition(60, false));
 
-    m_driverController.leftBumper()
-    .onTrue(m_climberSubsystem.setPosition(0, true));
+    // m_driverController.leftBumper()
+    // .onTrue(m_climberSubsystem.setPosition(0, true));
 
     // m_driverController.a().onTrue(m_climberSubsystem.switchLimitsCommand());
     // m_driverController.b().onTrue(m_climberSubsystem.setCurrentPosToZeroCommand());
 
-    // m_driverController.x().whileTrue(m_shooterSubsystem.shootSequence(-0.8, 35));
-    // m_driverController.y().whileTrue(m_shooterSubsystem.shootSequence(-0.8, 40)); //8 m/s
-    // m_driverController.b().whileTrue(m_shooterSubsystem.shootSequence(-0.8, 50));
-    // m_driverController.rightTrigger().whileTrue(m_shooterSubsystem.setDutyCycleFeeder(-0.8));
-
-
-    // m_driverController.a().onTrue(m_shooterSubsystem.shootSequence(-0.6, 60));
-    //m_driverController.b().onTrue(m_shooterSubsystem.shootSequence(-0.6, 40));
     //Shooter
-    m_driverController.x().whileTrue(Commands.deferredProxy(() -> m_shooterSubsystem.shootSequence(ShooterConstants.FEEDER_SPEED, m_telemetrySubsystem.getRPSForPosition())));
+    //m_driverController.x().whileTrue(Commands.deferredProxy(() -> m_shooterSubsystem.shootSequence(ShooterConstants.FEEDER_SPEED, m_telemetrySubsystem.getRPSForPosition())));
     m_driverController.a().whileTrue(Commands.deferredProxy(() -> m_shooterSubsystem.shootSequence(ShooterConstants.FEEDER_SPEED, 35)));
 
-    // m_driverController.b().onTrue(m_shooterSubsystem.setDutyCycle(0));
-
-
-
+    //SHOOT WITH TREE MAP AND ALIGN
+    // m_driverController.x().whileTrue(
+    //   Commands.parallel(
+    //     Commands.deferredProxy(() -> m_shooterSubsystem.shootSequence(
+    //       ShooterConstants.FEEDER_SPEED, 
+    //       m_telemetrySubsystem.getRPSForPosition()
+    //     )),
+    //     Commands.sequence(
+    //       m_intakeSubsystem.setPosition(IntakeConstants.PivotConstants.DEPLOY_ROTATIONS),
+    //       Commands.waitSeconds(0.3),
+    //       m_intakeSubsystem.setPosition(IntakeConstants.PivotConstants.RETRACT_ROTATIONS),
+    //       Commands.waitSeconds(0.3)
+    //     ).repeatedly()
+    //   ).finallyDo((interrupted) -> 
+    //     m_intakeSubsystem.setPosition(IntakeConstants.PivotConstants.RETRACT_ROTATIONS).schedule()
+    //   )
+    // );
     //xButton.onTrue(m_autosContainer.m_moveToTargetL);
     //yButton.onTrue(m_autosContainer.m_moveF);
     //aButton.onTrue(m_autosContainer.m_moveB);
     //bButton.onTrue(m_autosContainer.m_moveToTargetR);
 
+    bButton.onTrue(m_autosContainer.m_moveToTargetChain);
     // m_driverController.b().whileTrue(m_intake.deployAndRun());
 //     m_driverController.b().onTrue(m_intakeSubsystem.setCurrentPosToZeroCommand());
 
+    // DEPLOY AND RUN INTAKE
     m_driverController.povUp()
          .whileTrue(m_intakeSubsystem.setPosition(IntakeConstants.PivotConstants.RETRACT_ROTATIONS));
-
-
-     m_driverController.povDown()
+    m_driverController.povDown()
          .whileTrue(m_intakeSubsystem.setPosition(IntakeConstants.PivotConstants.DEPLOY_ROTATIONS));
-  
-    m_driverController.rightTrigger()
-        .whileTrue(m_intakeSubsystem.setRollerDutyCycle(-0.98));
 
-    m_driverController.b().onTrue(
-    Commands.parallel(
-        // 1. Run the feeder backwards at 80% (assuming -0.8 is backwards)
-        m_shooterSubsystem.setDutyCycleFeeder(-0.8),
+     m_driverController.rightTrigger()
+      .whileTrue(
+          m_intakeSubsystem.setRollerDutyCycle(-IntakeConstants.RollerConstants.INTAKE_SPEED)
+    );
 
-        // 2. Perform the wiggle sequence
-        Commands.sequence(
-            Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, -5), true), m_swerveDriveSubsystem)
-                .withTimeout(0.2),
-            Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 5), true), m_swerveDriveSubsystem)
-                .withTimeout(0.4),
-            // Stop the drivetrain
-            Commands.runOnce(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 0), true), m_swerveDriveSubsystem)
-        )
-    ).withTimeout(0.8) // This ensures the feeder stops when the wiggle finishes
-);
+    m_driverController.leftTrigger()
+      .whileTrue(
+          m_intakeSubsystem.setRollerDutyCycle(IntakeConstants.RollerConstants.INTAKE_SPEED)
+    );
+
+    //SPIN COMMAND
+  //   m_driverController.b().onTrue(
+  //   Commands.parallel(
+  //       m_shooterSubsystem.setDutyCycleFeeder(0.8),
+
+  //       Commands.sequence(
+  //           Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, -5), true), m_swerveDriveSubsystem)
+  //               .withTimeout(0.2),
+  //           Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 5), true), m_swerveDriveSubsystem)
+  //               .withTimeout(0.4),
+  //           Commands.runOnce(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 0), true), m_swerveDriveSubsystem)
+  //       )
+  //   ).withTimeout(0.6) 
+  // );
     // m_driverController.povUp()
     //     .onTrue(m_shooterSubsystem.runOnce(() -> m_shooterSubsystem.increaseSpeed()));
 

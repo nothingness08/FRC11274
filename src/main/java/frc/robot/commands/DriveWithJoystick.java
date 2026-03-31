@@ -50,7 +50,7 @@ public class DriveWithJoystick extends Command {
     double xSpeed = m_controller.getLeftX(); 
     double ySpeed = -m_controller.getLeftY();
     double rot = m_controller.getRightX(); //rotate with joystick
-    System.out.println("rot speed normal: " + rot);
+    //System.out.println("rot speed normal: " + rot);
 
     double mag = Math.sqrt(Math.pow(ySpeed, 2) + Math.pow(xSpeed, 2));
     if(mag < OIConstants.CONTROLLER_DEADBAND) {
@@ -71,7 +71,7 @@ public class DriveWithJoystick extends Command {
     if(alignToHub.getAsBoolean()){
       double currentDeg = m_telemetrySubsystem.getPose().getRotation().getDegrees();
       double targetDeg  = m_telemetrySubsystem.targetRotationToHub().getDegrees();
-      rot = pidController.calculate(currentDeg, targetDeg);
+      rot = -pidController.calculate(currentDeg, targetDeg);
     }
     
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(

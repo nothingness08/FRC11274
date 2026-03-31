@@ -19,15 +19,16 @@ public class MoveToTargetAuto extends Command {
   private final SwerveDriveSubsystem m_swerveDrive;
   private final TelemetrySubsystem m_telemetrySubsystem;
   private final Pose2d targetPos;
+  private double rotationTolerance, translationTolerance, kP; 
 
   private final TrapezoidProfile.Constraints linearConstraints = 
-      new TrapezoidProfile.Constraints(4.0, 2);
+      new TrapezoidProfile.Constraints(0.7, 2);
   
   private final TrapezoidProfile.Constraints thetaConstraints = 
       new TrapezoidProfile.Constraints(6.28, 3.14);
 
-  private final ProfiledPIDController xController = new ProfiledPIDController(6, 0, 0, linearConstraints);
-  private final ProfiledPIDController yController = new ProfiledPIDController(6, 0, 0, linearConstraints);
+  private final ProfiledPIDController xController = new ProfiledPIDController(2, 0.2, 0, linearConstraints);
+  private final ProfiledPIDController yController = new ProfiledPIDController(2, 0.2, 0, linearConstraints);
   private final ProfiledPIDController thetaController = new ProfiledPIDController(5, 0, 0, thetaConstraints);
 
   public MoveToTargetAuto(SwerveDriveSubsystem swerveDrive, TelemetrySubsystem telemetrySubsystem, Pose2d targetPos) {
@@ -93,6 +94,6 @@ public class MoveToTargetAuto extends Command {
     double rotationDist = Math.abs(currentPose.getRotation().minus(targetPos.getRotation()).getDegrees());
 
     
-    return translationDist < 0.05 && rotationDist < 5.0;
+    return translationDist < 0.1 && rotationDist < 5.0;
   }
 }

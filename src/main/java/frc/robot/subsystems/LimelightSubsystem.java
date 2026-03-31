@@ -18,7 +18,7 @@ public class LimelightSubsystem extends SubsystemBase {
     if(LIMELIGHT_NAME == "limelight"){
       LimelightHelpers.setCameraPose_RobotSpace(LIMELIGHT_NAME, 
           -0.3175,    
-          -0.00381,   
+          -0.00635,   
           0.42418,
           0.0, 
           7,  

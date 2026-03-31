@@ -26,8 +26,8 @@ public class FollowWaypointsAuto extends Command {
     m_telemetrySubsystem = telemetrySubsystem;
     m_waypoints = waypoints;
 
-    PIDController xController = new PIDController(5, 0, 0);
-    PIDController yController = new PIDController(5, 0, 0);
+    PIDController xController = new PIDController(2, 0, 0);
+    PIDController yController = new PIDController(2, 0, 0);
     
     ProfiledPIDController thetaController = new ProfiledPIDController(
       3, 0, 0, 
@@ -45,7 +45,7 @@ public class FollowWaypointsAuto extends Command {
   @Override
   public void initialize() {
     m_index = 0;
-    //m_telemetrySubsystem.resetPose(null);
+    m_telemetrySubsystem.resetPose(m_waypoints.get(0).pose());
   }
 
   @Override
@@ -77,6 +77,8 @@ public class FollowWaypointsAuto extends Command {
         true
       );
     }
+
+    System.out.println(m_index + ": ");
 
     // Advance to next waypoint if we are close enough
     if (m_controller.atReference()) {

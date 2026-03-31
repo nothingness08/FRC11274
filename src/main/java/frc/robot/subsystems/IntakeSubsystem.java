@@ -31,13 +31,14 @@ public class IntakeSubsystem extends SubsystemBase {
     TalonFXConfiguration rollerConfigs = new TalonFXConfiguration();
     TalonFXConfiguration pivotConfigs = new TalonFXConfiguration();
     
-    pivotConfigs.Slot0.kP = IntakeConstants.PivotConstants.kP;
-    pivotConfigs.Slot0.kG = IntakeConstants.PivotConstants.kG;
-    pivotConfigs.Slot0.kV = IntakeConstants.PivotConstants.kV;
+    pivotConfigs.Slot0.kP = IntakeConstants.PivotConstants.kP_Down;
+    //pivotConfigs.Slot0.kG = IntakeConstants.PivotConstants.kG;
+    //pivotConfigs.Slot0.kV = IntakeConstants.PivotConstants.kV;
+    pivotConfigs.Slot1.kP = IntakeConstants.PivotConstants.kP_Up;
 
     pivotConfigs.Feedback.SensorToMechanismRatio = IntakeConstants.PivotConstants.GEAR_RATIO; 
     pivotConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    pivotConfigs.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+    //pivotConfigs.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
     pivotConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     pivotConfigs.CurrentLimits.SupplyCurrentLimit = IntakeConstants.PivotConstants.SUPPLY_CURRENT_LIMIT;
@@ -72,7 +73,6 @@ public class IntakeSubsystem extends SubsystemBase {
     rollerConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
 
     m_roller.getConfigurator().apply(rollerConfigs);
-
   }
 
   
@@ -93,8 +93,17 @@ public class IntakeSubsystem extends SubsystemBase {
     setTargetPosition(getPivotPosition());
   }
 
-  private Command moveToPosition() {
-    return run(() -> {m_pivot.setControl(new PositionVoltage(targetRotation).withSlot(0));});
+    private Command moveToPosition() {
+    return run(() -> {
+      double error = targetRotation - getPivotPosition();
+      int slot;
+      if (Math.abs(error) < 0.01) {
+        slot = 0; 
+      } else {
+        slot = (error > 0) ? 1 : 0;
+      }
+      m_pivot.setControl(new PositionVoltage(targetRotation).withSlot(slot));
+    });
   }
 
   private void setTargetPosition(double rotations){
@@ -104,11 +113,10 @@ public class IntakeSubsystem extends SubsystemBase {
  public Command setPosition(double rotations) {
     return run(() -> {
         setTargetPosition(rotations);
-        m_pivot.setControl(new PositionVoltage(rotations).withSlot(0));
         System.out.println("Distance to target: " + (getPivotPosition() - rotations));
     })
     .until(() -> Math.abs(getPivotPosition() - rotations) < 0.005);
-} 
+  } 
 
   public double getPivotPosition() {
     return m_pivot.getPosition().getValueAsDouble();
@@ -123,7 +131,8 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public Command setRollerDutyCycle(double dutycycle) {
-      return run(() -> m_roller.setControl(new DutyCycleOut(dutycycle)))
+      return run(() -> {m_roller.setControl(new DutyCycleOut(dutycycle));
+        m_pivot.setControl(new DutyCycleOut(-0.06));})
         .finallyDo(() -> stopRoller()); 
   }
 
