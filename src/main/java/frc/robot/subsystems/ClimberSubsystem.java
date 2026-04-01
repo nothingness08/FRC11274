@@ -91,10 +91,9 @@ public class ClimberSubsystem extends SubsystemBase {
     return run(() -> m_climber.setControl(new PositionVoltage(rotations).withSlot(slot)))
         .until(() -> {
             double currentPosition = m_climber.getPosition().refresh().getValueAsDouble();
-            return Math.abs(currentPosition - rotations) < 1;
+            return Math.abs(currentPosition - rotations) < 0.2;
         })
         .finallyDo(() -> {
-            // Optional: Stop the motor or switch to a neutral mode when finished
             m_climber.setControl(new DutyCycleOut(0));
         });
 

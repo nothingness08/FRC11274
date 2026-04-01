@@ -7,6 +7,8 @@ package frc.robot;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.IntakeConstants;
@@ -62,7 +64,7 @@ public class RobotContainer {
     m_driverController, 
     m_telemetrySubsystem,
     () -> m_driverController.getHID().getXButton(), //Hub Align, this overrides
-    () -> m_driverController.getHID().getYButton() //Joystick Align
+    () -> m_driverController.getLeftTriggerAxis() > 0.5 //Joystick rotate
   ));
     // 
 
@@ -77,11 +79,24 @@ public class RobotContainer {
     //     .whileTrue(m_climberSubsystem.setDutyCycle(-0.3));
 
     //CLIMBING
-    m_driverController.rightBumper()
-         .onTrue(m_climberSubsystem.setPosition(60, false));
+    // m_driverController.rightBumper()
+    //      .onTrue(m_climberSubsystem.setPosition(60, false));
 
-    m_driverController.leftBumper()
-    .onTrue(m_climberSubsystem.setPosition(0, true));
+    // m_driverController.leftBumper()
+    // .onTrue(m_climberSubsystem.setPosition(0, true));
+    m_driverController.leftBumper().onTrue(
+      new InstantCommand(() -> {
+        double currentPos = m_climberSubsystem.getPosition();
+        double minHeight = Constants.ClimberConstants.MIN_HEIGHT_ROTATIONS;
+        double maxHeight = Constants.ClimberConstants.MAX_HEIGHT_ROTATIONS;
+
+        if (Math.abs(currentPos - minHeight) > (maxHeight / 2)) {
+          m_climberSubsystem.setPosition(minHeight, true);
+        } else {
+          m_climberSubsystem.setPosition(maxHeight, false);
+        }
+      }, m_climberSubsystem) 
+    );
 
     // m_driverController.a().onTrue(m_climberSubsystem.switchLimitsCommand());
     // m_driverController.b().onTrue(m_climberSubsystem.setCurrentPosToZeroCommand());
@@ -89,7 +104,6 @@ public class RobotContainer {
     //Shooter
     //m_driverController.x().whileTrue(Commands.deferredProxy(() -> m_shooterSubsystem.shootSequence(ShooterConstants.FEEDER_SPEED, m_telemetrySubsystem.getRPSForPosition())));
     m_driverController.a().whileTrue(Commands.deferredProxy(() -> m_shooterSubsystem.shootSequence(ShooterConstants.FEEDER_SPEED, 35)).alongWith(m_intakeSubsystem.oscillate()));
-
     //SHOOT WITH TREE MAP AND ALIGN
     // m_driverController.x().whileTrue(
     //   Commands.parallel(
@@ -127,7 +141,7 @@ public class RobotContainer {
           m_intakeSubsystem.setRollerVelocity(-IntakeConstants.RollerConstants.ROLLER_RPS)
     );
 
-    m_driverController.leftTrigger()
+    m_driverController.rightBumper()
       .whileTrue(
           m_intakeSubsystem.setRollerVelocity(IntakeConstants.RollerConstants.ROLLER_RPS)
     );

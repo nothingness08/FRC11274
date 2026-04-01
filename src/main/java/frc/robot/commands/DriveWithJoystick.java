@@ -25,7 +25,7 @@ public class DriveWithJoystick extends Command {
   private final CommandXboxController  m_controller;
   private final TelemetrySubsystem m_telemetrySubsystem;
 
-  private final PIDController pidController = new PIDController(0.07, 0, 0);
+  private final PIDController pidController = new PIDController(0.05, 0.0, 0);
   private BooleanSupplier alignToHub, alignToJoystick;
 
   public DriveWithJoystick(SwerveDriveSubsystem swerveDrive, CommandXboxController controller, TelemetrySubsystem telemetrySubsystem, BooleanSupplier alignToHub, BooleanSupplier alignToJoystick) {
@@ -53,22 +53,20 @@ public class DriveWithJoystick extends Command {
     //System.out.println("rot speed normal: " + rot);
 
     double mag = Math.sqrt(Math.pow(ySpeed, 2) + Math.pow(xSpeed, 2));
+    double rotMag = Math.sqrt(Math.pow(m_controller.getRightX(), 2) + Math.pow(m_controller.getRightY(), 2));
     if(mag < OIConstants.CONTROLLER_DEADBAND) {
       xSpeed = 0.0;
       ySpeed = 0.0;
     }
     rot = Math.abs(rot) > OIConstants.CONTROLLER_DEADBAND ? rot : 0.0;
-    xSpeed *= (1/(mag));
-    ySpeed *= (1/(mag));
-    if (alignToJoystick.getAsBoolean()) { 
-      if (mag > OIConstants.CONTROLLER_DEADBAND) {
-          double joystickAngle = m_swerveDrive.findAngles(new double[] {xSpeed / mag, ySpeed / mag});
-          double targetHeading = joystickAngle - 90;
-          double currentHeading = m_telemetrySubsystem.getPose().getRotation().getDegrees();
-          rot = -pidController.calculate(currentHeading, targetHeading);
-      } else {
-          rot = 0.0; // stick centered, hold current heading
-      }
+    //xSpeed *= (1/(mag));
+    //ySpeed *= (1/(mag));
+    //System.out.println(mag);
+    if (alignToJoystick.getAsBoolean() && Math.abs(rotMag) > OIConstants.CONTROLLER_DEADBAND) { 
+      double joystickAngle = m_swerveDrive.findAngles(new double[] {m_controller.getRightX(), -m_controller.getRightY()});
+      double targetHeading = joystickAngle - 90;
+      double currentHeading = m_telemetrySubsystem.getPose().getRotation().getDegrees();
+      rot = -pidController.calculate(currentHeading, targetHeading);
     }
     if(alignToHub.getAsBoolean()){
       double currentDeg = m_telemetrySubsystem.getPose().getRotation().getDegrees();
@@ -77,7 +75,7 @@ public class DriveWithJoystick extends Command {
     }
     
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
-      xSpeed * SwerveDriveConstants.DRIVE_SPEED, ySpeed *SwerveDriveConstants.DRIVE_SPEED, rot*SwerveDriveConstants.ROTATE_SPEED);
+      xSpeed * SwerveDriveConstants.MAX_DRIVE_SPEED, ySpeed *SwerveDriveConstants.MAX_DRIVE_SPEED, rot*SwerveDriveConstants.MAX_ROTATE_SPEED);
 
     m_swerveDrive.drive(chassisSpeeds, true);
   }

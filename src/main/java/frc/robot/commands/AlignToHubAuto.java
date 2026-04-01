@@ -26,7 +26,7 @@ public class AlignToHubAuto extends Command {
     
     double rot = -pid.calculate(0, error);
     // Move at 0 speed but apply rotation
-    m_swerveDrive.drive(new ChassisSpeeds(0, 0, rot * SwerveDriveConstants.ROTATE_SPEED), true);
+    m_swerveDrive.drive(new ChassisSpeeds(0, 0, rot * SwerveDriveConstants.MAX_ROTATE_SPEED), true);
   }
 
   @Override

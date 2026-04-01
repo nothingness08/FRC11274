@@ -41,8 +41,8 @@ public final class Constants {
 
     public static final int TICKS_PER_REVOLUTION = 4096;
 
-    public static final double DRIVE_SPEED = 1; // m/s DRIVE SPEED
-    public static final double ROTATE_SPEED = 2; // rad/s ROTATE SPEED
+    public static final double MAX_DRIVE_SPEED = 1; // m/s MAX DRIVE SPEED
+    public static final double MAX_ROTATE_SPEED = 2; // rad/s MAX ROTATE SPEED
     public static final double WHEEL_RADIUS = 0.051;
 
     public static final String CANbus = "rio";
@@ -138,7 +138,7 @@ public final class Constants {
       public static final double kV = 0;
       public static final double kG = 0.5;
 
-      public static final double kP_Down = 6;
+      public static final double kP_Down = 8;
       public static final double SUPPLY_CURRENT_LIMIT = 100;
       public static final double STATOR_CURRENT_LIMIT = 100;
 
@@ -149,6 +149,10 @@ public final class Constants {
 
       public static final double DEPLOY_ROTATIONS = -0.418;
       public static final double RETRACT_ROTATIONS = -0.04;
+
+      public static final double DEPLOY_ROTATIONS_SHOOTING = -0.25;
+      public static final double RETRACT_ROTATIONS_SHOOTING = -0.1;
+
       public static final double INITIALIZE_ROTATIONS = 0;
     }
 
@@ -176,7 +180,7 @@ public final class Constants {
 
   public static final class OIConstants {
     public static final int DRIVER_CONTROLLER_PORT = 0;
-    public static final double CONTROLLER_DEADBAND = 0.8;
+    public static final double CONTROLLER_DEADBAND = 0.3;
   }
 
   public static class OperatorConstants {

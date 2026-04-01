@@ -105,14 +105,13 @@ public final class AutosContainer {
     );
 
     m_BlueRightAuto = new SequentialCommandGroup(
-      Commands.runOnce(() -> m_telemetrySubsystem.resetPose(new Pose2d(toMeters(174), toMeters(18), Rotation2d.fromDegrees(0)))),
+      Commands.runOnce(() -> m_telemetrySubsystem.resetPose(new Pose2d(toMeters(174), toMeters(18), Rotation2d.fromDegrees(180)))),
       intakeSubsystem.setPosition(IntakeConstants.PivotConstants.DEPLOY_ROTATIONS),
-      new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(toMeters(314), toMeters(20), Rotation2d.fromDegrees(180)), 10.0, 4.5, 4.0, 0.15, 5),
+      new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(toMeters(314), toMeters(25), Rotation2d.fromDegrees(180)), 10.0, 4.5, 4.0, 0.15, 5),
 
       new ParallelDeadlineGroup(
         new SequentialCommandGroup(
           new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(toMeters(314), toMeters(135), Rotation2d.fromDegrees(90)), 10, 1.5, 3, 0.15, 5),
-          new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(toMeters(283), toMeters(141), Rotation2d.fromDegrees(-113)), 10, 2, 3, 0.1, 5),
           new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(toMeters(244), toMeters(49), Rotation2d.fromDegrees(-113)), 10, 1.5, 3, 0.1, 5)
         ),
         intakeSubsystem.setRollerVelocity(-IntakeConstants.RollerConstants.ROLLER_RPS)

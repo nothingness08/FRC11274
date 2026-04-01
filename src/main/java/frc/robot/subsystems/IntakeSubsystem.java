@@ -116,10 +116,8 @@ public class IntakeSubsystem extends SubsystemBase {
  public Command setPosition(double rotations) {
     return run(() -> {
         setTargetPosition(rotations);
-        //System.out.println("Distance to target: " + (getPivotPosition() - rotations));
-    })
-    .until(() -> Math.abs(getPivotPosition() - rotations) < 0.005);
-  } 
+    }).until(() -> Math.abs(getPivotPosition() - rotations) < 0.05);
+  }
 
   public double getPivotPosition() {
     return m_pivot.getPosition().getValueAsDouble();
@@ -150,17 +148,35 @@ public class IntakeSubsystem extends SubsystemBase {
   //       });
   // }
 
-  public Command oscillate() {
-    return new SequentialCommandGroup(
-        setPosition(IntakeConstants.PivotConstants.DEPLOY_ROTATIONS).withTimeout(0.5),
-        setPosition(IntakeConstants.PivotConstants.RETRACT_ROTATIONS).withTimeout(0.5)
-    ).repeatedly();
+  private Command waitWithSubsystem(double seconds) {
+    return run(() -> {}).withTimeout(seconds);
+}
+
+public Command oscillate() {
+    return run(() -> {
+        double target = IntakeConstants.PivotConstants.DEPLOY_ROTATIONS;
+        double error = target - getPivotPosition();
+        int slot = (error > 0) ? 1 : 0;
+        m_pivot.setControl(new PositionVoltage(target).withSlot(slot));
+    })
+    .until(() -> Math.abs(getPivotPosition() - IntakeConstants.PivotConstants.DEPLOY_ROTATIONS_SHOOTING) < 0.05)
+    .andThen(run(() -> {}).withTimeout(0.5))
+    .andThen(run(() -> {
+        double target = IntakeConstants.PivotConstants.RETRACT_ROTATIONS;
+        double error = target - getPivotPosition();
+        int slot = (error > 0) ? 1 : 0;
+        m_pivot.setControl(new PositionVoltage(target).withSlot(slot));
+    })
+    .until(() -> Math.abs(getPivotPosition() - IntakeConstants.PivotConstants.RETRACT_ROTATIONS_SHOOTING) < 0.05))
+    .andThen(run(() -> {}).withTimeout(0.5))
+    .repeatedly();
 }
 
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Intake Position", getPivotPosition());
     SmartDashboard.putNumber("Intake Target Position", targetRotation);
+    //System.out.println(targetRotation);
     // This method will be called once per scheduler run
   }
 
