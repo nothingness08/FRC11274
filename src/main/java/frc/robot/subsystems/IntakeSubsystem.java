@@ -9,6 +9,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -60,6 +61,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     rollerConfigs.Slot0.kV = IntakeConstants.RollerConstants.kV;
     rollerConfigs.Slot0.kP = IntakeConstants.RollerConstants.kP;
+    rollerConfigs.Slot0.kS = IntakeConstants.RollerConstants.kS;
 
     rollerConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
@@ -131,21 +133,21 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public Command setRollerVelocity(double velocityRPS) {
-    return run(() -> m_roller.setControl(new VelocityVoltage(velocityRPS)))
+    return run(() -> m_roller.setControl(new VelocityVoltage(velocityRPS).withSlot(0)))
         .finallyDo(() -> stopRoller());
   }
 
   public void stopRoller() {
-      m_roller.setControl(new VelocityVoltage(0));
+    m_roller.setControl(new VelocityVoltage(0));
   }
   
-  public Command deployAndRun() {
-    return setPosition(IntakeConstants.PivotConstants.DEPLOY_ROTATIONS)
-        .andThen(run(() -> m_roller.setControl(new DutyCycleOut(IntakeConstants.RollerConstants.INTAKE_SPEED))))
-        .finallyDo(() -> {
-            stopRoller();
-        });
-  }
+  // public Command deployAndRun() {
+  //   return setPosition(IntakeConstants.PivotConstants.DEPLOY_ROTATIONS)
+  //       .andThen(run(() -> m_roller.setControl(new DutyCycleOut(IntakeConstants.RollerConstants.INTAKE_SPEED))))
+  //       .finallyDo(() -> {
+  //           stopRoller();
+  //       });
+  // }
 
   @Override
   public void periodic() {

@@ -93,10 +93,10 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public Command shootSequence(double feederPercent, double shooterRPS) {
     return run(() -> {
-       m_shooter.setControl(new VelocityVoltage(shooterRPS).withSlot(0));
+       m_shooter.setControl(new VelocityVoltage(shooterRPSTest).withSlot(0)); //shooterRPS CHANGE BACK
 
       // 2. Only run the feeder if the shooter is at speed
-      if (atSetpoint(shooterRPS)) {
+      if (atSetpoint(shooterRPSTest)) {
         m_feeder.setControl(new DutyCycleOut(feederPercent));
       } else {
         m_feeder.setControl(new DutyCycleOut(0));

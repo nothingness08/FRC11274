@@ -77,11 +77,11 @@ public class RobotContainer {
     //     .whileTrue(m_climberSubsystem.setDutyCycle(-0.3));
 
     //CLIMBING
-    // m_driverController.rightBumper()
-    //     .onTrue(m_climberSubsystem.setPosition(60, false));
+    m_driverController.rightBumper()
+         .onTrue(m_climberSubsystem.setPosition(60, false));
 
-    // m_driverController.leftBumper()
-    // .onTrue(m_climberSubsystem.setPosition(0, true));
+    m_driverController.leftBumper()
+    .onTrue(m_climberSubsystem.setPosition(0, true));
 
     // m_driverController.a().onTrue(m_climberSubsystem.switchLimitsCommand());
     // m_driverController.b().onTrue(m_climberSubsystem.setCurrentPosToZeroCommand());
@@ -112,7 +112,7 @@ public class RobotContainer {
     //aButton.onTrue(m_autosContainer.m_moveB);
     //bButton.onTrue(m_autosContainer.m_moveToTargetR);
 
-    //bButton.onTrue(m_autosContainer.m_moveToTargetChain);
+    bButton.onTrue(m_autosContainer.m_BlueLeftAuto);
     // m_driverController.b().whileTrue(m_intake.deployAndRun());
 //     m_driverController.b().onTrue(m_intakeSubsystem.setCurrentPosToZeroCommand());
 
@@ -124,12 +124,12 @@ public class RobotContainer {
 
      m_driverController.rightTrigger()
       .whileTrue(
-          m_intakeSubsystem.setRollerDutyCycle(-IntakeConstants.RollerConstants.INTAKE_SPEED)
+          m_intakeSubsystem.setRollerVelocity(-IntakeConstants.RollerConstants.ROLLER_RPS)
     );
 
     m_driverController.leftTrigger()
       .whileTrue(
-          m_intakeSubsystem.setRollerDutyCycle(IntakeConstants.RollerConstants.INTAKE_SPEED)
+          m_intakeSubsystem.setRollerVelocity(IntakeConstants.RollerConstants.ROLLER_RPS)
     );
 
     //SPIN COMMAND

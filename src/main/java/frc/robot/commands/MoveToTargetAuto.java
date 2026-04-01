@@ -19,26 +19,28 @@ public class MoveToTargetAuto extends Command {
   private final SwerveDriveSubsystem m_swerveDrive;
   private final TelemetrySubsystem m_telemetrySubsystem;
   private final Pose2d targetPos;
-  private double rotationTolerance, translationTolerance, kP; 
+  private double rotationTolerance, translationTolerance; 
 
-  private final TrapezoidProfile.Constraints linearConstraints = 
+  private TrapezoidProfile.Constraints linearConstraints = 
       new TrapezoidProfile.Constraints(0.7, 2);
   
-  private final TrapezoidProfile.Constraints thetaConstraints = 
-      new TrapezoidProfile.Constraints(6.28, 3.14);
+  private TrapezoidProfile.Constraints thetaConstraints = 
+      new TrapezoidProfile.Constraints(10, 5);
 
-  private final ProfiledPIDController xController = new ProfiledPIDController(2, 0.2, 0, linearConstraints);
-  private final ProfiledPIDController yController = new ProfiledPIDController(2, 0.2, 0, linearConstraints);
-  private final ProfiledPIDController thetaController = new ProfiledPIDController(5, 0, 0, thetaConstraints);
+  private ProfiledPIDController xController = new ProfiledPIDController(2, 0.2, 0, linearConstraints);
+  private ProfiledPIDController yController = new ProfiledPIDController(2, 0.2, 0, linearConstraints);
+  private ProfiledPIDController thetaController = new ProfiledPIDController(5, 0, 0, thetaConstraints);
 
-  public MoveToTargetAuto(SwerveDriveSubsystem swerveDrive, TelemetrySubsystem telemetrySubsystem, Pose2d targetPos, double kP, double vmax, double amax) {
+  public MoveToTargetAuto(SwerveDriveSubsystem swerveDrive, TelemetrySubsystem telemetrySubsystem, Pose2d targetPos, double kP, double vmax, double amax, double translationTolerance, double rotationTolerance) {
     m_swerveDrive = swerveDrive;
     this.targetPos = targetPos;
     m_telemetrySubsystem = telemetrySubsystem;
-    linearConstraints = new TrapezoidProfile.Constraints(kmax, vmax);
-    xController = new ProfiledPIDController(kP, 0, 0, linearConstraints);
-    yController = new ProfiledPIDController(kP, 0, 0, linearConstraints);
+    linearConstraints = new TrapezoidProfile.Constraints(vmax, amax);
+    xController = new ProfiledPIDController(kP, 0.1, 0, linearConstraints);
+    yController = new ProfiledPIDController(kP, 0.1, 0, linearConstraints);
 
+    this.rotationTolerance = rotationTolerance;
+    this.translationTolerance = translationTolerance;
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
     addRequirements(m_swerveDrive);
   }
@@ -97,6 +99,6 @@ public class MoveToTargetAuto extends Command {
     double rotationDist = Math.abs(currentPose.getRotation().minus(targetPos.getRotation()).getDegrees());
 
     
-    return translationDist < 0.1 && rotationDist < 5.0;
+    return translationDist < translationTolerance && rotationDist < rotationTolerance;
   }
 }

@@ -41,8 +41,8 @@ public final class Constants {
 
     public static final int TICKS_PER_REVOLUTION = 4096;
 
-    public static final double DRIVE_SPEED = 3; // m/s DRIVE SPEED
-    public static final double ROTATE_SPEED = 4; // rad/s ROTATE SPEED
+    public static final double DRIVE_SPEED = 1; // m/s DRIVE SPEED
+    public static final double ROTATE_SPEED = 2; // rad/s ROTATE SPEED
     public static final double WHEEL_RADIUS = 0.051;
 
     public static final String CANbus = "rio";
@@ -87,7 +87,7 @@ public final class Constants {
     public static final int shooter2_ID = 18;
     public static final int feeder_ID = 13;
 
-    public static final double kP = 0.5; //1.2
+    public static final double kP = 0.3; //1.2
     public static final double kV = 0.12345;
     public static final double kS = 0.0; //0.24
 
@@ -145,8 +145,7 @@ public final class Constants {
       public static final double MAX_ROTATIONS = -0.02;
       public static final double MIN_ROTATIONS = -0.6;
 
-      public static final 
-      double GEAR_RATIO = 10;
+      public static final double GEAR_RATIO = 10;
 
       public static final double DEPLOY_ROTATIONS = -0.418;
       public static final double RETRACT_ROTATIONS = -0.04;
@@ -155,15 +154,16 @@ public final class Constants {
 
     public static final class RollerConstants{
       public static final int ROLLER_ID = 19;
-      public static final double kP = 0;
-      public static final double kV = 0;
+      public static final double kP = 0.1; //0.1
+      public static final double kV = 0.096; //0.09
+      public static final double kS = 0.6; //2.2
 
-      public static final double SUPPLY_CURRENT_LIMIT = 50;
-      public static final double STATOR_CURRENT_LIMIT = 50;
+      public static final double SUPPLY_CURRENT_LIMIT = 60;
+      public static final double STATOR_CURRENT_LIMIT = 60;
 
       public static final double GEAR_RATIO = 10;
 
-      public static final double INTAKE_SPEED = 0.85  ;
+      public static final double ROLLER_RPS = 70;
 
     }
     
