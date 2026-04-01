@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimberConstants;
 import frc.robot.Constants.IntakeConstants;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 public class IntakeSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
@@ -115,7 +116,7 @@ public class IntakeSubsystem extends SubsystemBase {
  public Command setPosition(double rotations) {
     return run(() -> {
         setTargetPosition(rotations);
-        System.out.println("Distance to target: " + (getPivotPosition() - rotations));
+        //System.out.println("Distance to target: " + (getPivotPosition() - rotations));
     })
     .until(() -> Math.abs(getPivotPosition() - rotations) < 0.005);
   } 
@@ -148,6 +149,13 @@ public class IntakeSubsystem extends SubsystemBase {
   //           stopRoller();
   //       });
   // }
+
+  public Command oscillate() {
+    return new SequentialCommandGroup(
+        setPosition(IntakeConstants.PivotConstants.DEPLOY_ROTATIONS).withTimeout(0.5),
+        setPosition(IntakeConstants.PivotConstants.RETRACT_ROTATIONS).withTimeout(0.5)
+    ).repeatedly();
+}
 
   @Override
   public void periodic() {

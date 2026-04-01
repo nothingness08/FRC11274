@@ -61,12 +61,14 @@ public class DriveWithJoystick extends Command {
     xSpeed *= (1/(mag));
     ySpeed *= (1/(mag));
     if (alignToJoystick.getAsBoolean()) { 
-      double joystickAngle = m_swerveDrive.findAngles(new double[] {xSpeed, ySpeed}); 
-      double targetHeading = joystickAngle - 90;
-
-      double currentHeading = m_telemetrySubsystem.getPose().getRotation().getDegrees();
-
-      rot = pidController.calculate(currentHeading, targetHeading);
+      if (mag > OIConstants.CONTROLLER_DEADBAND) {
+          double joystickAngle = m_swerveDrive.findAngles(new double[] {xSpeed / mag, ySpeed / mag});
+          double targetHeading = joystickAngle - 90;
+          double currentHeading = m_telemetrySubsystem.getPose().getRotation().getDegrees();
+          rot = -pidController.calculate(currentHeading, targetHeading);
+      } else {
+          rot = 0.0; // stick centered, hold current heading
+      }
     }
     if(alignToHub.getAsBoolean()){
       double currentDeg = m_telemetrySubsystem.getPose().getRotation().getDegrees();

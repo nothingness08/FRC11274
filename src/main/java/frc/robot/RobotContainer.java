@@ -88,7 +88,7 @@ public class RobotContainer {
 
     //Shooter
     //m_driverController.x().whileTrue(Commands.deferredProxy(() -> m_shooterSubsystem.shootSequence(ShooterConstants.FEEDER_SPEED, m_telemetrySubsystem.getRPSForPosition())));
-    m_driverController.a().whileTrue(Commands.deferredProxy(() -> m_shooterSubsystem.shootSequence(ShooterConstants.FEEDER_SPEED, 35)));
+    m_driverController.a().whileTrue(Commands.deferredProxy(() -> m_shooterSubsystem.shootSequence(ShooterConstants.FEEDER_SPEED, 35)).alongWith(m_intakeSubsystem.oscillate()));
 
     //SHOOT WITH TREE MAP AND ALIGN
     // m_driverController.x().whileTrue(
