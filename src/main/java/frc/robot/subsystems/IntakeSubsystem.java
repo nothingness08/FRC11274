@@ -172,6 +172,16 @@ public Command oscillate() {
     .repeatedly();
 }
 
+  public Command intakeDown(){
+    return run(() -> {
+        double target = IntakeConstants.PivotConstants.DEPLOY_ROTATIONS;
+        double error = target - getPivotPosition();
+        int slot = (error > 0) ? 1 : 0;
+        m_pivot.setControl(new PositionVoltage(target).withSlot(slot));
+    })
+    .until(() -> Math.abs(getPivotPosition() - IntakeConstants.PivotConstants.DEPLOY_ROTATIONS_SHOOTING) < 0.05);
+  }
+
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Intake Position", getPivotPosition());

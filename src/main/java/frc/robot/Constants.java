@@ -139,8 +139,8 @@ public final class Constants {
       public static final double kG = 0.5;
 
       public static final double kP_Down = 8;
-      public static final double SUPPLY_CURRENT_LIMIT = 100;
-      public static final double STATOR_CURRENT_LIMIT = 100;
+      public static final double SUPPLY_CURRENT_LIMIT = 80;
+      public static final double STATOR_CURRENT_LIMIT = 80;
 
       public static final double MAX_ROTATIONS = -0.02;
       public static final double MIN_ROTATIONS = -0.6;

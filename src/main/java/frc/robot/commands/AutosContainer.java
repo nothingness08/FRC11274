@@ -105,9 +105,9 @@ public final class AutosContainer {
     );
 
     m_BlueRightAuto = new SequentialCommandGroup(
-      Commands.runOnce(() -> m_telemetrySubsystem.resetPose(new Pose2d(toMeters(174), toMeters(18), Rotation2d.fromDegrees(180)))),
-      intakeSubsystem.setPosition(IntakeConstants.PivotConstants.DEPLOY_ROTATIONS),
-      new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(toMeters(314), toMeters(25), Rotation2d.fromDegrees(180)), 10.0, 4.5, 4.0, 0.15, 5),
+      Commands.runOnce(() -> m_telemetrySubsystem.resetPose(new Pose2d(toMeters(174), toMeters(18), Rotation2d.fromDegrees(0)))),
+      intakeSubsystem.intakeDown(),
+      new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(toMeters(314), toMeters(25), Rotation2d.fromDegrees(0)), 10.0, 4.5, 4.0, 0.15, 5),
 
       new ParallelDeadlineGroup(
         new SequentialCommandGroup(
@@ -121,7 +121,7 @@ public final class AutosContainer {
       new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(toMeters(120), toMeters(24), Rotation2d.fromDegrees(0)), 10, 4.5, 4, 0.1, 5),
       new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(toMeters(120), toMeters(75), Rotation2d.fromDegrees(48)), 10, 4.5, 4, 0.1, 5),
       new AlignToHubAuto(m_swerveDriveSubsystem, m_telemetrySubsystem).withTimeout(0.5),
-      shooterSubsystem.shootSequence(ShooterConstants.FEEDER_SPEED, 34).withTimeout(4).alongWith(intakeSubsystem.oscillate()),
+      shooterSubsystem.shootSequence(ShooterConstants.FEEDER_SPEED, 36).withTimeout(4).alongWith(intakeSubsystem.oscillate()),
       new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(toMeters(120), toMeters(75), Rotation2d.fromDegrees(48)), 10, 4.5, 4, 0.05, 5),
       new MoveToTargetAuto(m_swerveDriveSubsystem, m_telemetrySubsystem, new Pose2d(toMeters(340), toMeters(24), Rotation2d.fromDegrees(0)), 10, 4.5, 4, 0.1, 5)
     );
@@ -176,8 +176,8 @@ public final class AutosContainer {
     // m_chooser.addOption("Red Right Auto", m_RedRightAuto);
 
 
-    // SmartDashboard.putData("Auto Chooser", m_chooser);
-    //m_chooser.addOption("Align Auto", m_AlignToTag);
+    SmartDashboard.putData("Auto Chooser", m_chooser);
+    m_chooser.addOption("Blue Righr", m_BlueRightAuto);
     SmartDashboard.putData("Auto Chooser",m_chooser);
   }
 

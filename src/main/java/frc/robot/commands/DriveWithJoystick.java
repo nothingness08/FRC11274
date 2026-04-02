@@ -26,14 +26,14 @@ public class DriveWithJoystick extends Command {
   private final TelemetrySubsystem m_telemetrySubsystem;
 
   private final PIDController pidController = new PIDController(0.05, 0.0, 0);
-  private BooleanSupplier alignToHub, alignToJoystick;
+  private BooleanSupplier alignToHub, rotateJoystick;
 
-  public DriveWithJoystick(SwerveDriveSubsystem swerveDrive, CommandXboxController controller, TelemetrySubsystem telemetrySubsystem, BooleanSupplier alignToHub, BooleanSupplier alignToJoystick) {
+  public DriveWithJoystick(SwerveDriveSubsystem swerveDrive, CommandXboxController controller, TelemetrySubsystem telemetrySubsystem, BooleanSupplier alignToHub, BooleanSupplier rotateJoystick) {
     m_swerveDrive = swerveDrive;
     m_controller = controller;
     m_telemetrySubsystem = telemetrySubsystem;
     this.alignToHub = alignToHub;
-    this.alignToJoystick = alignToJoystick;
+    this.rotateJoystick = rotateJoystick;
     addRequirements(m_swerveDrive);
     pidController.enableContinuousInput(-180, 180);
   }
@@ -58,11 +58,10 @@ public class DriveWithJoystick extends Command {
       xSpeed = 0.0;
       ySpeed = 0.0;
     }
-    rot = Math.abs(rot) > OIConstants.CONTROLLER_DEADBAND ? rot : 0.0;
     //xSpeed *= (1/(mag));
     //ySpeed *= (1/(mag));
     //System.out.println(mag);
-    if (alignToJoystick.getAsBoolean() && Math.abs(rotMag) > OIConstants.CONTROLLER_DEADBAND) { 
+    if (Math.abs(rotMag) > OIConstants.CONTROLLER_DEADBAND) { 
       double joystickAngle = m_swerveDrive.findAngles(new double[] {m_controller.getRightX(), -m_controller.getRightY()});
       double targetHeading = joystickAngle - 90;
       double currentHeading = m_telemetrySubsystem.getPose().getRotation().getDegrees();
@@ -72,6 +71,9 @@ public class DriveWithJoystick extends Command {
       double currentDeg = m_telemetrySubsystem.getPose().getRotation().getDegrees();
       double targetDeg  = m_telemetrySubsystem.targetRotationToHub().getDegrees();
       rot = -pidController.calculate(currentDeg, targetDeg);
+    }
+    if(rotateJoystick.getAsBoolean()){
+      rot = Math.abs(rot) > OIConstants.CONTROLLER_DEADBAND ? rot : 0.0;
     }
     
     ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
