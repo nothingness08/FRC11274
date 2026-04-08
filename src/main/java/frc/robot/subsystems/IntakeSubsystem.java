@@ -54,6 +54,9 @@ public class IntakeSubsystem extends SubsystemBase {
     pivotConfigs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = IntakeConstants.PivotConstants.MIN_ROTATIONS;
     pivotConfigs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
+    pivotConfigs.Voltage.PeakForwardVoltage = 11.0;
+    pivotConfigs.Voltage.PeakReverseVoltage = -11.0;
+
     this.setDefaultCommand(moveToPosition());
     m_pivot.setPosition(IntakeConstants.PivotConstants.INITIALIZE_ROTATIONS);
     targetRotation = getPivotPosition();
@@ -154,7 +157,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
 public Command oscillate() {
     return run(() -> {
-        double target = IntakeConstants.PivotConstants.DEPLOY_ROTATIONS;
+        double target = IntakeConstants.PivotConstants.DEPLOY_ROTATIONS_SHOOTING;
         double error = target - getPivotPosition();
         int slot = (error > 0) ? 1 : 0;
         m_pivot.setControl(new PositionVoltage(target).withSlot(slot));
@@ -162,7 +165,7 @@ public Command oscillate() {
     .until(() -> Math.abs(getPivotPosition() - IntakeConstants.PivotConstants.DEPLOY_ROTATIONS_SHOOTING) < 0.05)
     .andThen(run(() -> {}).withTimeout(0.5))
     .andThen(run(() -> {
-        double target = IntakeConstants.PivotConstants.RETRACT_ROTATIONS;
+        double target = IntakeConstants.PivotConstants.RETRACT_ROTATIONS_SHOOTING;
         double error = target - getPivotPosition();
         int slot = (error > 0) ? 1 : 0;
         m_pivot.setControl(new PositionVoltage(target).withSlot(slot));
@@ -179,7 +182,7 @@ public Command oscillate() {
         int slot = (error > 0) ? 1 : 0;
         m_pivot.setControl(new PositionVoltage(target).withSlot(slot));
     })
-    .until(() -> Math.abs(getPivotPosition() - IntakeConstants.PivotConstants.DEPLOY_ROTATIONS_SHOOTING) < 0.05);
+    .until(() -> Math.abs(getPivotPosition() - IntakeConstants.PivotConstants.DEPLOY_ROTATIONS) < 0.05);
   }
 
   @Override

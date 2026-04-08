@@ -29,7 +29,7 @@ public class MoveToTargetAuto extends Command {
 
   private ProfiledPIDController xController = new ProfiledPIDController(2, 0.2, 0, linearConstraints);
   private ProfiledPIDController yController = new ProfiledPIDController(2, 0.2, 0, linearConstraints);
-  private ProfiledPIDController thetaController = new ProfiledPIDController(5, 0, 0, thetaConstraints);
+  private ProfiledPIDController thetaController = new ProfiledPIDController(8, 0, 0, thetaConstraints);
 
   public MoveToTargetAuto(SwerveDriveSubsystem swerveDrive, TelemetrySubsystem telemetrySubsystem, Pose2d targetPos, double kP, double vmax, double amax, double translationTolerance, double rotationTolerance) {
     m_swerveDrive = swerveDrive;

@@ -63,7 +63,7 @@ public class RobotContainer {
     m_swerveDriveSubsystem, 
     m_driverController, 
     m_telemetrySubsystem,
-    () -> m_driverController.getHID().getXButton(), //Hub Align, this overrides
+    () -> m_driverController.getHID().getLeftBumperButton(), //Hub Align, this overrides
     () -> m_driverController.getLeftTriggerAxis() > 0.5 //Joystick rotate
   ));
     // 
@@ -72,38 +72,41 @@ public class RobotContainer {
   }
 
   private void configureButtonBindings() {
-    // m_driverController.povUp()
-    //     .whileTrue(m_climberSubsystem.setDutyCycle(0.3));
+    //m_driverController.povUp()
+     //    .whileTrue(m_climberSubsystem.setDutyCycle(0.3));
 
-    // m_driverController.povDown()
-    //     .whileTrue(m_climberSubsystem.setDutyCycle(-0.3));
+     //m_driverController.povDown()
+       //  .whileTrue(m_climberSubsystem.setDutyCycle(-0.3));
 
     //CLIMBING
-    // m_driverController.rightBumper()
-    //      .onTrue(m_climberSubsystem.setPosition(60, false));
+    m_driverController.povLeft()
+         .onTrue(m_climberSubsystem.setPosition(55, false));
 
-    // m_driverController.leftBumper()
-    // .onTrue(m_climberSubsystem.setPosition(0, true));
-    m_driverController.leftBumper().onTrue(
-      new InstantCommand(() -> {
-        double currentPos = m_climberSubsystem.getPosition();
-        double minHeight = Constants.ClimberConstants.MIN_HEIGHT_ROTATIONS;
-        double maxHeight = Constants.ClimberConstants.MAX_HEIGHT_ROTATIONS;
+    m_driverController.povRight()
+    .onTrue(m_climberSubsystem.setPosition(0, true));
+     m_driverController.leftBumper().onTrue(
+       new InstantCommand(() -> {
+         double currentPos = m_climberSubsystem.getPosition();
+         double minHeight = Constants.ClimberConstants.MIN_HEIGHT_ROTATIONS;
+         double maxHeight = Constants.ClimberConstants.MAX_HEIGHT_ROTATIONS;
 
-        if (Math.abs(currentPos - minHeight) > (maxHeight / 2)) {
-          m_climberSubsystem.setPosition(minHeight, true);
-        } else {
-          m_climberSubsystem.setPosition(maxHeight, false);
-        }
-      }, m_climberSubsystem) 
-    );
+         if (Math.abs(currentPos - minHeight) > (maxHeight / 2)) {
+           m_climberSubsystem.setPosition(minHeight, true);
+         } else {
+           m_climberSubsystem.setPosition(maxHeight, false); 
+         }
+       }, m_climberSubsystem) 
+     );
 
     // m_driverController.a().onTrue(m_climberSubsystem.switchLimitsCommand());
     // m_driverController.b().onTrue(m_climberSubsystem.setCurrentPosToZeroCommand());
 
     //Shooter
     //m_driverController.x().whileTrue(Commands.deferredProxy(() -> m_shooterSubsystem.shootSequence(ShooterConstants.FEEDER_SPEED, m_telemetrySubsystem.getRPSForPosition())));
-    m_driverController.a().whileTrue(Commands.deferredProxy(() -> m_shooterSubsystem.shootSequence(ShooterConstants.FEEDER_SPEED, 35)).alongWith(m_intakeSubsystem.oscillate()));
+    m_driverController.a().whileTrue(Commands.deferredProxy(() -> m_shooterSubsystem.shootSequence(ShooterConstants.FEEDER_SPEED, 37.5)));
+    m_driverController.b().whileTrue(Commands.deferredProxy(() -> m_shooterSubsystem.shootSequence(ShooterConstants.FEEDER_SPEED, 39)));
+    //m_driverController.y().whileTrue(Commands.deferredProxy(() -> m_shooterSubsystem.shootSequence(ShooterConstants.FEEDER_SPEED, 38)).alongWith(m_intakeSubsystem.oscillate()));
+
     //SHOOT WITH TREE MAP AND ALIGN
     // m_driverController.x().whileTrue(
     //   Commands.parallel(
@@ -126,7 +129,8 @@ public class RobotContainer {
     //aButton.onTrue(m_autosContainer.m_moveB);
     //bButton.onTrue(m_autosContainer.m_moveToTargetR);
 
-    bButton.onTrue(m_autosContainer.m_BlueRightAuto);
+    //RUN AUTO
+    //bButton.onTrue(m_autosContainer.m_BlueRightAuto);
     // m_driverController.b().whileTrue(m_intake.deployAndRun());
 //     m_driverController.b().onTrue(m_intakeSubsystem.setCurrentPosToZeroCommand());
 
@@ -147,19 +151,21 @@ public class RobotContainer {
     );
 
     //SPIN COMMAND
-  //   m_driverController.b().onTrue(
-  //   Commands.parallel(
-  //       m_shooterSubsystem.setDutyCycleFeeder(0.8),
+    m_driverController.x().onTrue(
+    Commands.parallel(
+        m_shooterSubsystem.setDutyCycleFeeder(0.8),
 
-  //       Commands.sequence(
-  //           Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, -5), true), m_swerveDriveSubsystem)
-  //               .withTimeout(0.2),
-  //           Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 5), true), m_swerveDriveSubsystem)
-  //               .withTimeout(0.4),
-  //           Commands.runOnce(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 0), true), m_swerveDriveSubsystem)
-  //       )
-  //   ).withTimeout(0.6) 
-  // );
+        Commands.sequence(
+            Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, -5), true), m_swerveDriveSubsystem)
+                .withTimeout(0.2),
+            Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 5), true), m_swerveDriveSubsystem)
+                .withTimeout(0.4),
+            Commands.runOnce(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 0), true), m_swerveDriveSubsystem)
+        )
+    ).withTimeout(0.6) 
+  );
+
+    //INTERPOLATING TREE TUNING
     // m_driverController.povUp()
     //     .onTrue(m_shooterSubsystem.runOnce(() -> m_shooterSubsystem.increaseSpeed()));
 
