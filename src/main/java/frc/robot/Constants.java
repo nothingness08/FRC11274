@@ -20,7 +20,7 @@ public final class Constants {
   public static final class SwerveDriveConstants {
     public static final double robotWidth = 0.508; // Distance between left and right wheels in meters
     public static final double robotLength = 0.442;  // Distance between front and back wheels in meters
-    public static final double kMaxSpeedMetersPerSecond = 3.0; // Maximum speed of the robot
+    public static final double kMaxSpeedMetersPerSecond = 3; // Maximum speed of the robot
     public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI; // Maximum angular speed
 
 
@@ -33,15 +33,15 @@ public final class Constants {
     public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(FRONT_LEFT_LOCATION, FRONT_RIGHT_LOCATION, BACK_LEFT_LOCATION, BACK_RIGHT_LOCATION);
 
     public static final double[] ANGLE_OFFSETS_TICKS = {
-      3218,  // FL 1170
-      2473,  // FR 425
-      1688,  // BL 3736
-      922   // BR 2970
+      3175,  // FL 1170
+      2514,  // FR 425
+      1646,  // BL 3736
+      2620   // BR 2970
     };
 
     public static final int TICKS_PER_REVOLUTION = 4096;
 
-    public static final double MAX_DRIVE_SPEED = 3.5; // m/s MAX DRIVE SPEED
+    public static final double MAX_DRIVE_SPEED = 0.7; // m/s MAX DRIVE SPEED
     public static final double MAX_ROTATE_SPEED = 2; // rad/s MAX ROTATE SPEED
     public static final double WHEEL_RADIUS = 0.051;
 
@@ -93,8 +93,8 @@ public final class Constants {
 
     public static final double GEAR_RATIO = 1.5;
 
-    public static final double SUPPLY_CURRENT_LIMIT = 50;
-    public static final double STATOR_CURRENT_LIMIT = 50;
+    public static final double SUPPLY_CURRENT_LIMIT = 35;
+    public static final double STATOR_CURRENT_LIMIT = 35;
 
     public static final double FEEDER_SPEED = -0.8;
   }
@@ -151,7 +151,7 @@ public final class Constants {
       public static final double RETRACT_ROTATIONS = -0.07;
 
       public static final double DEPLOY_ROTATIONS_SHOOTING = -0.4;
-      public static final double RETRACT_ROTATIONS_SHOOTING = -0.05;
+      public static final double RETRACT_ROTATIONS_SHOOTING = -0.02;
 
       public static final double INITIALIZE_ROTATIONS = 0;
     }
@@ -167,7 +167,7 @@ public final class Constants {
 
       public static final double GEAR_RATIO = 10;
 
-      public static final double ROLLER_RPS = 70;
+      public static final double ROLLER_RPS = 118;
 
     }
     
