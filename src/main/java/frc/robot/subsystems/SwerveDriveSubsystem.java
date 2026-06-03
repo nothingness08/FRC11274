@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveDriveConstants;
 
@@ -67,6 +68,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     {-Math.sqrt(2)/2, -Math.sqrt(2)/2}};
   
   private Pigeon m_pigeon;
+
+  private double[][] xFormationPositions = {
+    {-Math.sqrt(2)/2, Math.sqrt(2)/2}, 
+    {Math.sqrt(2)/2, Math.sqrt(2)/2}, 
+    {Math.sqrt(2)/2, Math.sqrt(2)/2}, 
+    {-Math.sqrt(2)/2, Math.sqrt(2)/2}};
 
   public SwerveDriveSubsystem(Pigeon pigeon) {
     //make this for loop to initialize all 4 modules
@@ -244,6 +251,16 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     }
   }
 
+  public void xFormation(){ //TEST THISSSSSSSSSSSSSSSSSSSSSSSS
+    for(int i = 0; i < 4; i++){
+      double targetAngle = findAngles(xFormationPositions[i]);
+      double currentTick = getCurrentTick(targetAngle, i);
+      targetTick[i] = currentTick;
+      lastAngle[i] = targetAngle;
+      m_AngleMotor[i].set(TalonSRXControlMode.Position, currentTick);
+    }
+  }
+
   public SwerveModulePosition[] getModulePositions(){
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
     for(int i = 0; i < 4; i++){
@@ -289,10 +306,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
 
-    // SmartDashboard.putNumber("Actual Tick FL: ", m_AngleMotor[0].getSelectedSensorPosition());
-    // SmartDashboard.putNumber("Actual Tick FR: ", m_AngleMotor[1].getSelectedSensorPosition());
-    // SmartDashboard.putNumber("Actual Tick BL: ", m_AngleMotor[2].getSelectedSensorPosition());
-    // SmartDashboard.putNumber("Actual Tick BR: ", m_AngleMotor[3].getSelectedSensorPosition());
+    SmartDashboard.putNumber("Actual Tick FL: ", m_AngleMotor[0].getSelectedSensorPosition());
+    SmartDashboard.putNumber("Actual Tick FR: ", m_AngleMotor[1].getSelectedSensorPosition());
+    SmartDashboard.putNumber("Actual Tick BL: ", m_AngleMotor[2].getSelectedSensorPosition());
+    SmartDashboard.putNumber("Actual Tick BR: ", m_AngleMotor[3].getSelectedSensorPosition());
 
     // double[] deltas = getDeltaTarget();
     // SmartDashboard.putNumber("Delta Tick FL: ", deltas[0]);

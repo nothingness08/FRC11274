@@ -51,8 +51,9 @@ public class ShooterSubsystem extends SubsystemBase {
     configs.CurrentLimits.StatorCurrentLimitEnable = true;
 
     m_shooter.getConfigurator().apply(configs);
-
+    m_feeder.getConfigurator().apply(configs);
     m_follower.setControl(toFollowLeader);
+
   }
 
   /**

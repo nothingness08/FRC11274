@@ -181,6 +181,7 @@ public Command oscillate() {
         double error = target - getPivotPosition();
         int slot = (error > 0) ? 1 : 0;
         m_pivot.setControl(new PositionVoltage(target).withSlot(slot));
+        setTargetPosition(IntakeConstants.PivotConstants.DEPLOY_ROTATIONS);
     })
     .until(() -> Math.abs(getPivotPosition() - IntakeConstants.PivotConstants.DEPLOY_ROTATIONS) < 0.05);
   }

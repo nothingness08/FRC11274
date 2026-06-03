@@ -25,7 +25,7 @@ public class DriveWithJoystick extends Command {
   private final CommandXboxController  m_controller;
   private final TelemetrySubsystem m_telemetrySubsystem;
 
-  private final PIDController pidController = new PIDController(0.05, 0.0, 0);
+  private final PIDController pidController = new PIDController(0.03, 0.0, 0); //TUNE THIS
   private BooleanSupplier alignToHub, rotateJoystick;
 
   public DriveWithJoystick(SwerveDriveSubsystem swerveDrive, CommandXboxController controller, TelemetrySubsystem telemetrySubsystem, BooleanSupplier alignToHub, BooleanSupplier rotateJoystick) {
@@ -49,7 +49,7 @@ public class DriveWithJoystick extends Command {
 
     double xSpeed = m_controller.getLeftX(); 
     double ySpeed = -m_controller.getLeftY();
-    double rot = m_controller.getRightX(); //rotate with joystick
+    double rot = 0; //rotate with joystick
     //System.out.println("rot speed normal: " + rot);
 
     double mag = Math.sqrt(Math.pow(ySpeed, 2) + Math.pow(xSpeed, 2));

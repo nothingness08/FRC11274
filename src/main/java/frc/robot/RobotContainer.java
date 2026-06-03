@@ -65,7 +65,7 @@ public class RobotContainer {
     m_telemetrySubsystem,
     () -> m_driverController.getHID().getLeftBumperButton(), //Hub Align, this overrides
     () -> m_driverController.getLeftTriggerAxis() > 0.5 //Joystick rotate
-  ));
+    ));
     // 
 
     LimelightHelpers.setupPortForwardingUSB(0);
@@ -151,19 +151,20 @@ public class RobotContainer {
     );
 
     //SPIN COMMAND
-    m_driverController.x().onTrue(
-    Commands.parallel(
-        m_shooterSubsystem.setDutyCycleFeeder(0.8),
+  //   m_driverController.x().onTrue(
+  //   Commands.parallel(
+  //       m_shooterSubsystem.setDutyCycleFeeder(0.8),
 
-        Commands.sequence(
-            Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, -5), true), m_swerveDriveSubsystem)
-                .withTimeout(0.2),
-            Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 5), true), m_swerveDriveSubsystem)
-                .withTimeout(0.4),
-            Commands.runOnce(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 0), true), m_swerveDriveSubsystem)
-        )
-    ).withTimeout(0.6) 
-  );
+  //       Commands.sequence(
+  //           Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, -5), true), m_swerveDriveSubsystem)
+  //               .withTimeout(0.2),
+  //           Commands.run(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 5), true), m_swerveDriveSubsystem)
+  //               .withTimeout(0.4),
+  //           Commands.runOnce(() -> m_swerveDriveSubsystem.drive(new ChassisSpeeds(0, 0, 0), true), m_swerveDriveSubsystem)
+  //       )
+  //   ).withTimeout(0.6) 
+  // );
+  m_driverController.x().whileTrue(Commands.run(() -> m_swerveDriveSubsystem.xFormation()));
 
     //INTERPOLATING TREE TUNING
     // m_driverController.povUp()
